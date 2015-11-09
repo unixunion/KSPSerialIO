@@ -69,6 +69,9 @@ namespace KSPSerialIO
         public float IAS;           //50  Indicated Air Speed
         public byte CurrentStage;   //51  Current stage number
         public byte TotalStage;     //52  TotalNumber of stages
+		public byte FarSOINumber;   //51  The SOI of the farthest patch. 0 if this is an uninterrupted orbit
+		public float FarAP;         //52  The AP of the farthest patch.
+		public float FarPE;         //53  The PE of the farthest patch.
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -952,12 +955,24 @@ namespace KSPSerialIO
                     KSPSerialPort.VData.MachNumber = (float)ActiveVessel.mach;
                     KSPSerialPort.VData.IAS = (float)ActiveVessel.indicatedAirSpeed;
 
-                    KSPSerialPort.VData.CurrentStage = (byte)Staging.CurrentStage;
-                    KSPSerialPort.VData.TotalStage = (byte)Staging.StageCount;
-
-                    
-
+                    Orbit farOrbit = fetchFarOrbit(ActiveVessel);
+                    if (farOrbit != null)
+                    {
+                        KSPSerialPort.VData.FarSOINumber = GetSOINumber(farOrbit.referenceBody.name);
+                        KSPSerialPort.VData.FarAP = (float)farOrbit.ApA;
+                        KSPSerialPort.VData.FarPE = (float)farOrbit.PeA;
+                    } else
+                    {
+                        KSPSerialPort.VData.FarSOINumber = 0;
+                        KSPSerialPort.VData.FarAP = 0;
+                        KSPSerialPort.VData.FarPE = 0;
+                    }
                     #region debugjunk
+                    //Debug.Log("KSPSerialIO: Far SOI " + KSPSerialPort.VData.FarSOINumber.ToString() + " Far AP " + KSPSerialPort.VData.FarAP.ToString() + " Far PE " + KSPSerialPort.VData.FarPE.ToString());
+                    //Debug.Log("KSPSerialIO: Overheat " + KSPSerialPort.VData.MaxOverHeat.ToString());
+                    //Debug.Log("KSPSerialIO: Mach " + KSPSerialPort.VData.MachNumber.ToString());
+                    //Debug.Log("KSPSerialIO: IAS " + KSPSerialPort.VData.IAS.ToString());
+                    //Debug.Log("KSPSerialIO: SOI " + ActiveVessel.orbit.referenceBody.name + KSPSerialPort.VData.SOINumber.ToString());
                     /*
                     
                     Debug.Log("KSPSerialIO: Stage " + KSPSerialPort.VData.CurrentStage.ToString() + ' ' +
@@ -968,9 +983,8 @@ namespace KSPSerialIO
                     
                     Debug.Log("KSPSerialIO: SOI " + ActiveVessel.orbit.referenceBody.name + KSPSerialPort.VData.SOINumber.ToString());
                     
-                    ScreenMessages.PostScreenMessage(KSPSerialPort.VData.OxidizerS.ToString() + "/" + KSPSerialPort.VData.OxidizerTotS +
-                        "   " + KSPSerialPort.VData.Oxidizer.ToString() + "/" + KSPSerialPort.VData.OxidizerTot);
-                    */
+                    //ScreenMessages.PostScreenMessage(KSPSerialPort.VData.OxidizerS.ToString() + "/" + KSPSerialPort.VData.OxidizerTotS +
+                    //    "   " + KSPSerialPort.VData.Oxidizer.ToString() + "/" + KSPSerialPort.VData.OxidizerTot);
                     //KSPSerialPort.VData.Roll = Mathf.Atan2(2 * (x * y + w * z), w * w + x * x - y * y - z * z) * 180 / Mathf.PI;
                     //KSPSerialPort.VData.Pitch = Mathf.Atan2(2 * (y * z + w * x), w * w - x * x - y * y + z * z) * 180 / Mathf.PI;
                     //KSPSerialPort.VData.Heading = Mathf.Asin(-2 * (x * z - w * y)) *180 / Mathf.PI;
@@ -1474,7 +1488,6 @@ namespace KSPSerialIO
                     var engineModuleFx = module as ModuleEnginesFX;
                     if (engineModuleFx != null)
                     {
-                        var engineMod = engineModuleFx;
                         if (engineModuleFx.getIgnitionState)
                         {
                             retList.Add (part);
@@ -1612,6 +1625,33 @@ namespace KSPSerialIO
             return Quaternion.Inverse (Quaternion.Euler (90, 0, 0) * Quaternion.Inverse (v.GetTransform ().rotation) * rotationSurface);
         }
 
+        private Orbit fetchFarOrbit(Vessel v)
+        {
+            Orbit prevOrbit = null;
+            Orbit curOrbit = v.orbit;
+            Orbit nextOrbit = curOrbit.nextPatch;
+            while (nextOrbit != null && nextOrbit.activePatch)
+            {
+                //if (prevOrbit != null && prevOrbit.referenceBody.name.Equals(nextOrbit.referenceBody.name, StringComparison.Ordinal))
+                if (prevOrbit != null && ReferenceEquals(prevOrbit.referenceBody, nextOrbit.referenceBody))
+                {
+                    break;
+                } else
+                {
+                    prevOrbit = curOrbit;
+                    curOrbit = nextOrbit;
+                    nextOrbit = curOrbit.nextPatch;
+                }
+            }
+
+            if (prevOrbit == null)
+            {
+                return null;
+            } else
+            {
+                return curOrbit;
+            }
+        }
         #endregion
 
 //        void FixedUpdate ()
