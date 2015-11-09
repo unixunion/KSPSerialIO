@@ -72,6 +72,18 @@ namespace KSPSerialIO
 		public byte FarSOINumber;   //51  The SOI of the farthest patch. 0 if this is an uninterrupted orbit
 		public float FarAP;         //52  The AP of the farthest patch.
 		public float FarPE;         //53  The PE of the farthest patch.
+        public float ProgradePitch; //54 Direction of orbital prograde,
+        public float ProgradeHeading;//55 relative to vessel attitude
+        public float NormalPitch;   //56 Direction of orbit normal,
+        public float NormalHeading; //57 relative to vessel attitude
+        public float RadialPitch;   //58 Direction of orbit radial,
+        public float RadialHeading; //59 relative to vessel attitude
+        public float ProgradeSPitch; //60 Direction of surface prograde,
+        public float ProgradeSHeading;//61 relative to vessel attitude
+        public float TargetPitch; //62 Direction of target prograde
+        public float TargetHeading; //63 relative to vessel attitude
+        public float ManeuverPitch; //64 Direction of maneuver
+        public float ManeuverHeading; //65 relative to vessel attitude
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -918,36 +930,65 @@ namespace KSPSerialIO
                         {
                             if (ActiveVessel.patchedConicSolver.maneuverNodes.Count > 0)
                             {
-                                KSPSerialPort.VData.MNTime = (UInt32)Math.Round (ActiveVessel.patchedConicSolver.maneuverNodes [0].UT - Planetarium.GetUniversalTime ());
-                                KSPSerialPort.VData.MNDeltaV = (float)ActiveVessel.patchedConicSolver.maneuverNodes [0].DeltaV.magnitude;
+                                KSPSerialPort.VData.MNTime = (UInt32)Math.Round(ActiveVessel.patchedConicSolver.maneuverNodes[0].UT - Planetarium.GetUniversalTime());
+                                KSPSerialPort.VData.MNDeltaV = (float)ActiveVessel.patchedConicSolver.maneuverNodes[0].DeltaV.magnitude;
+
+                                Vector3 maneuverVector = ActiveVessel.patchedConicSolver.maneuverNodes[0].GetBurnVector(ActiveVessel.orbit).normalized;
+                                double[] maneuverRelativeHeading = getOffsetFromHeading(ActiveVessel, maneuverVector);
+                                KSPSerialPort.VData.ManeuverPitch = (float)maneuverRelativeHeading[0];
+                                KSPSerialPort.VData.ManeuverHeading = (float)maneuverRelativeHeading[1];
                             }
                         }
                     }
 
-                    //Debug.Log("KSPSerialIO: 5");
+                    Vessel targetVessel = FlightGlobals.fetch.VesselTarget.GetVessel();
+                    if (targetVessel != null)
+                    {
+                        Vector3 targetVector = (targetVessel.GetWorldPos3D() - ActiveVessel.GetWorldPos3D()).normalized;
+                        double[] targetRelativeHeading = getOffsetFromHeading(ActiveVessel, targetVector);
+                        KSPSerialPort.VData.TargetPitch = (float)targetRelativeHeading[0];
+                        KSPSerialPort.VData.TargetHeading = (float)targetRelativeHeading[1];
+                    }
 
-                    Quaternion attitude = updateHeadingPitchRollField (ActiveVessel);
+                    Quaternion attitude = updateHeadingPitchRollField(ActiveVessel);
 
                     KSPSerialPort.VData.Roll = (float)((attitude.eulerAngles.z > 180) ? (attitude.eulerAngles.z - 360.0) : attitude.eulerAngles.z);
                     KSPSerialPort.VData.Pitch = (float)((attitude.eulerAngles.x > 180) ? (360.0 - attitude.eulerAngles.x) : -attitude.eulerAngles.x);
                     KSPSerialPort.VData.Heading = (float)attitude.eulerAngles.y;
 
-                    KSPSerialPort.ControlStatus ((int)enumAG.SAS, ActiveVessel.ActionGroups [KSPActionGroup.SAS]);
-                    KSPSerialPort.ControlStatus ((int)enumAG.RCS, ActiveVessel.ActionGroups [KSPActionGroup.RCS]);
-                    KSPSerialPort.ControlStatus ((int)enumAG.Light, ActiveVessel.ActionGroups [KSPActionGroup.Light]);
-                    KSPSerialPort.ControlStatus ((int)enumAG.Gear, ActiveVessel.ActionGroups [KSPActionGroup.Gear]);
-                    KSPSerialPort.ControlStatus ((int)enumAG.Brakes, ActiveVessel.ActionGroups [KSPActionGroup.Brakes]);
-                    KSPSerialPort.ControlStatus ((int)enumAG.Abort, ActiveVessel.ActionGroups [KSPActionGroup.Abort]);
-                    KSPSerialPort.ControlStatus ((int)enumAG.Custom01, ActiveVessel.ActionGroups [KSPActionGroup.Custom01]);
-                    KSPSerialPort.ControlStatus ((int)enumAG.Custom02, ActiveVessel.ActionGroups [KSPActionGroup.Custom02]);
-                    KSPSerialPort.ControlStatus ((int)enumAG.Custom03, ActiveVessel.ActionGroups [KSPActionGroup.Custom03]);
-                    KSPSerialPort.ControlStatus ((int)enumAG.Custom04, ActiveVessel.ActionGroups [KSPActionGroup.Custom04]);
-                    KSPSerialPort.ControlStatus ((int)enumAG.Custom05, ActiveVessel.ActionGroups [KSPActionGroup.Custom05]);
-                    KSPSerialPort.ControlStatus ((int)enumAG.Custom06, ActiveVessel.ActionGroups [KSPActionGroup.Custom06]);
-                    KSPSerialPort.ControlStatus ((int)enumAG.Custom07, ActiveVessel.ActionGroups [KSPActionGroup.Custom07]);
-                    KSPSerialPort.ControlStatus ((int)enumAG.Custom08, ActiveVessel.ActionGroups [KSPActionGroup.Custom08]);
-                    KSPSerialPort.ControlStatus ((int)enumAG.Custom09, ActiveVessel.ActionGroups [KSPActionGroup.Custom09]);
-                    KSPSerialPort.ControlStatus ((int)enumAG.Custom10, ActiveVessel.ActionGroups [KSPActionGroup.Custom10]);
+                    Vector3 progradeVector = ActiveVessel.GetObtVelocity().normalized;
+                    Vector3 normalVector = swapYZ(ActiveVessel.GetOrbit().GetOrbitNormal()).normalized;
+                    Vector3 radialVector = Vector3.Cross(progradeVector, normalVector).normalized;
+                    Vector3 progradeSVector = ActiveVessel.GetSrfVelocity().normalized;
+                    double[] progradeHeading = getOffsetFromHeading(ActiveVessel, progradeVector);
+                    double[] normalHeading = getOffsetFromHeading(ActiveVessel, normalVector);
+                    double[] radialHeading = getOffsetFromHeading(ActiveVessel, radialVector);
+                    double[] progradeSHeading = getOffsetFromHeading(ActiveVessel, progradeSVector);
+                    KSPSerialPort.VData.ProgradePitch = (float)progradeHeading[0];
+                    KSPSerialPort.VData.ProgradeHeading = (float)progradeHeading[1];
+                    KSPSerialPort.VData.NormalPitch = (float)normalHeading[0];
+                    KSPSerialPort.VData.NormalHeading = (float)normalHeading[1];
+                    KSPSerialPort.VData.RadialPitch = (float)radialHeading[0];
+                    KSPSerialPort.VData.RadialHeading = (float)radialHeading[1];
+                    KSPSerialPort.VData.ProgradeSPitch = (float)progradeSHeading[0];
+                    KSPSerialPort.VData.ProgradeSHeading = (float)progradeSHeading[1];
+
+                    KSPSerialPort.ControlStatus((int)enumAG.SAS, ActiveVessel.ActionGroups[KSPActionGroup.SAS]);
+                    KSPSerialPort.ControlStatus((int)enumAG.RCS, ActiveVessel.ActionGroups[KSPActionGroup.RCS]);
+                    KSPSerialPort.ControlStatus((int)enumAG.Light, ActiveVessel.ActionGroups[KSPActionGroup.Light]);
+                    KSPSerialPort.ControlStatus((int)enumAG.Gear, ActiveVessel.ActionGroups[KSPActionGroup.Gear]);
+                    KSPSerialPort.ControlStatus((int)enumAG.Brakes, ActiveVessel.ActionGroups[KSPActionGroup.Brakes]);
+                    KSPSerialPort.ControlStatus((int)enumAG.Abort, ActiveVessel.ActionGroups[KSPActionGroup.Abort]);
+                    KSPSerialPort.ControlStatus((int)enumAG.Custom01, ActiveVessel.ActionGroups[KSPActionGroup.Custom01]);
+                    KSPSerialPort.ControlStatus((int)enumAG.Custom02, ActiveVessel.ActionGroups[KSPActionGroup.Custom02]);
+                    KSPSerialPort.ControlStatus((int)enumAG.Custom03, ActiveVessel.ActionGroups[KSPActionGroup.Custom03]);
+                    KSPSerialPort.ControlStatus((int)enumAG.Custom04, ActiveVessel.ActionGroups[KSPActionGroup.Custom04]);
+                    KSPSerialPort.ControlStatus((int)enumAG.Custom05, ActiveVessel.ActionGroups[KSPActionGroup.Custom05]);
+                    KSPSerialPort.ControlStatus((int)enumAG.Custom06, ActiveVessel.ActionGroups[KSPActionGroup.Custom06]);
+                    KSPSerialPort.ControlStatus((int)enumAG.Custom07, ActiveVessel.ActionGroups[KSPActionGroup.Custom07]);
+                    KSPSerialPort.ControlStatus((int)enumAG.Custom08, ActiveVessel.ActionGroups[KSPActionGroup.Custom08]);
+                    KSPSerialPort.ControlStatus((int)enumAG.Custom09, ActiveVessel.ActionGroups[KSPActionGroup.Custom09]);
+                    KSPSerialPort.ControlStatus((int)enumAG.Custom10, ActiveVessel.ActionGroups[KSPActionGroup.Custom10]);
 
                     KSPSerialPort.VData.SOINumber = GetSOINumber(ActiveVessel.orbit.referenceBody.name);
 
@@ -1004,7 +1045,9 @@ namespace KSPSerialIO
                         "   " + KSPSerialPort.VData.LiquidFuel.ToString() + "/" + KSPSerialPort.VData.LiquidFuelTot);
                     */
                     #endregion
-                    KSPSerialPort.sendPacket (KSPSerialPort.VData);
+
+                    KSPSerialPort.sendPacket(KSPSerialPort.VData);
+
                 } //end refresh
                 #endregion
                 #region inputs
@@ -1625,6 +1668,46 @@ namespace KSPSerialIO
             return Quaternion.Inverse (Quaternion.Euler (90, 0, 0) * Quaternion.Inverse (v.GetTransform ().rotation) * rotationSurface);
         }
 
+        private double[] getOffsetFromHeading(Vessel ActiveVessel, Vector3d targetVector)
+        {
+            Vector3d yawComponent = Vector3d.Exclude(ActiveVessel.GetTransform().forward, targetVector);
+            Vector3d yawCross = Vector3d.Cross(yawComponent, ActiveVessel.GetTransform().right);
+            double yaw = SignedVectorAngle(yawComponent, ActiveVessel.GetTransform().up, yawCross);
+
+            Vector3d pitchComponent = Vector3d.Exclude(ActiveVessel.GetTransform().right, targetVector);
+            Vector3d pitchCross = Vector3d.Cross(pitchComponent, ActiveVessel.GetTransform().forward);
+            double pitch = SignedVectorAngle(pitchComponent, ActiveVessel.GetTransform().up, pitchCross);
+
+            if (Math.Abs(yaw) > 90) {
+                yaw = -yaw;
+                // This condition makes sure progradePitch doesn't wrap from -x to 360-x
+                if (pitch > 0) {
+                    pitch = pitch - 180;
+                } else {
+                    pitch = pitch + 180;
+                }
+            }
+            return new double[] {pitch, yaw};
+        }
+
+        private double SignedVectorAngle(Vector3d referenceVector, Vector3d otherVector, Vector3d normal)
+        {
+            Vector3d perpVector;
+            double angle;
+            //Use the geometry object normal and one of the input vectors to calculate the perpendicular vector
+            perpVector = Vector3d.Cross(normal, referenceVector);
+            //Now calculate the dot product between the perpendicular vector (perpVector) and the other input vector
+            angle = Vector3d.Angle(referenceVector, otherVector);
+            angle *= Math.Sign(Vector3d.Dot(perpVector, otherVector));
+
+            return angle;
+        }
+
+        private Vector3d swapYZ(Vector3d v)
+        {
+            return new Vector3d(v.x, v.z, v.y);
+        }
+ 
         private Orbit fetchFarOrbit(Vessel v)
         {
             Orbit prevOrbit = null;
@@ -1653,10 +1736,6 @@ namespace KSPSerialIO
             }
         }
         #endregion
-
-//        void FixedUpdate ()
-//        {
-//        }
 
         void OnDestroy ()
         {
