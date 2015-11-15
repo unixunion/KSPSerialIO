@@ -62,6 +62,7 @@ namespace KSPSerialIO
         public float Pitch;         //43
         public float Roll;          //44
         public float Heading;       //45
+<<<<<<< HEAD
         public UInt16 ActionGroups; //46  status bit order:SAS, RCS, Light, Gear, Brakes, Abort, Custom01 - 10 
         public byte SOINumber;      //47  SOI Number (decimal format: sun-planet-moon e.g. 130 = kerbin, 131 = mun)
         public byte MaxOverHeat;    //48  Max part overheat (% percent)
@@ -84,6 +85,27 @@ namespace KSPSerialIO
         public float TargetHeading; //63 relative to vessel attitude
         public float ManeuverPitch; //64 Direction of maneuver
         public float ManeuverHeading; //65 relative to vessel attitude
+=======
+        public float ProgradePitch; //46 Direction of orbital prograde,
+        public float ProgradeHeading;//47 relative to vessel attitude
+        public float NormalPitch;   //48 Direction of orbit normal,
+        public float NormalHeading; //49 relative to vessel attitude
+        public float RadialPitch;   //50 Direction of orbit radial,
+        public float RadialHeading; //51 relative to vessel attitude
+        public float ProgradeSPitch; //52 Direction of surface prograde,
+        public float ProgradeSHeading;//53 relative to vessel attitude
+        public float TargetPitch; //54 Direction of target prograde
+        public float TargetHeading; //55 relative to vessel attitude
+        public float ManeuverPitch; //56 Direction of maneuver
+        public float ManeuverHeading; //57 relative to vessel attitude
+        public UInt16 ActionGroups; //58  status bit order:SAS, RCS, Light, Gear, Brakes, Abort, Custom01 - 10 
+        public byte SOINumber;      //59  SOI Number (decimal format: sun-planet-moon e.g. 130 = kerbin, 131 = mun)
+        public byte MaxOverHeat;    //60  Max part overheat (% percent)
+        public float MachNumber;    //61
+        public float IAS;           //62  Indicated Air Speed
+        public byte CurrentStage;   //63  Current stage number
+        public byte TotalStage;     //64  TotalNumber of stages
+>>>>>>> zitronen-orbitalvectors
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
