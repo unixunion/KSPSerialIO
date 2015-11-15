@@ -62,30 +62,6 @@ namespace KSPSerialIO
         public float Pitch;         //43
         public float Roll;          //44
         public float Heading;       //45
-<<<<<<< HEAD
-        public UInt16 ActionGroups; //46  status bit order:SAS, RCS, Light, Gear, Brakes, Abort, Custom01 - 10 
-        public byte SOINumber;      //47  SOI Number (decimal format: sun-planet-moon e.g. 130 = kerbin, 131 = mun)
-        public byte MaxOverHeat;    //48  Max part overheat (% percent)
-        public float MachNumber;    //49
-        public float IAS;           //50  Indicated Air Speed
-        public byte CurrentStage;   //51  Current stage number
-        public byte TotalStage;     //52  TotalNumber of stages
-		public byte FarSOINumber;   //51  The SOI of the farthest patch. 0 if this is an uninterrupted orbit
-		public float FarAP;         //52  The AP of the farthest patch.
-		public float FarPE;         //53  The PE of the farthest patch.
-        public float ProgradePitch; //54 Direction of orbital prograde,
-        public float ProgradeHeading;//55 relative to vessel attitude
-        public float NormalPitch;   //56 Direction of orbit normal,
-        public float NormalHeading; //57 relative to vessel attitude
-        public float RadialPitch;   //58 Direction of orbit radial,
-        public float RadialHeading; //59 relative to vessel attitude
-        public float ProgradeSPitch; //60 Direction of surface prograde,
-        public float ProgradeSHeading;//61 relative to vessel attitude
-        public float TargetPitch; //62 Direction of target prograde
-        public float TargetHeading; //63 relative to vessel attitude
-        public float ManeuverPitch; //64 Direction of maneuver
-        public float ManeuverHeading; //65 relative to vessel attitude
-=======
         public float ProgradePitch; //46 Direction of orbital prograde,
         public float ProgradeHeading;//47 relative to vessel attitude
         public float NormalPitch;   //48 Direction of orbit normal,
@@ -105,7 +81,9 @@ namespace KSPSerialIO
         public float IAS;           //62  Indicated Air Speed
         public byte CurrentStage;   //63  Current stage number
         public byte TotalStage;     //64  TotalNumber of stages
->>>>>>> zitronen-orbitalvectors
+        public byte FarSOINumber;   //65  The SOI of the farthest patch. 0 if this is an uninterrupted orbit
+        public float FarAP;         //66  The AP of the farthest patch.
+        public float FarPE;         //67  The PE of the farthest patch.
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
