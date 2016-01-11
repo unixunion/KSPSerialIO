@@ -1499,7 +1499,7 @@ namespace KSPSerialIO
         {
             if (x < 0)
             {
-                x = 360 - x;
+                x = x + 360;
             }
             else if (x > 360)
             {
