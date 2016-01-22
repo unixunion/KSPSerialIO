@@ -61,7 +61,7 @@ namespace KSPSerialIO
         public float MNDeltaV;      //42
         public UInt16 Pitch;         //43
         public UInt16 Roll;          //44
-        public UInt16 Heading;       //45 Heading is always 0-360. Pitch and Roll -180 to 180.
+        public UInt16 Heading;       //45
         public UInt16 ProgradePitch; //46 Direction of orbital prograde,
         public UInt16 ProgradeHeading;//47 relative to vessel attitude
         public UInt16 NormalPitch;   //48 Direction of orbit normal,
@@ -888,7 +888,7 @@ namespace KSPSerialIO
                     double[] radialHeading = getOffsetFromHeading(ActiveVessel, radialVector);
                     double[] progradeSHeading = getOffsetFromHeading(ActiveVessel, progradeSVector);
                     KSPSerialPort.VData.ProgradePitch = ToScaledUInt(progradeHeading[0]);
-                    KSPSerialPort.VData.ProgradeHeading = ToScaledUInt(progradeHeading[1]);
+                    KSPSerialPort.VData.ProgradeHeading = 65535 - ToScaledUInt(progradeHeading[1]); // Inverting to account for odd-handedness of KSP's coordinate system
                     KSPSerialPort.VData.NormalPitch = ToScaledUInt(normalHeading[0]);
                     KSPSerialPort.VData.NormalHeading = ToScaledUInt(normalHeading[1]);
                     KSPSerialPort.VData.RadialPitch = ToScaledUInt(radialHeading[0]);
