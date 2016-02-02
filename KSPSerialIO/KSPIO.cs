@@ -63,17 +63,17 @@ namespace KSPSerialIO
         public UInt16 Roll;          //44
         public UInt16 Heading;       //45
         public UInt16 ProgradePitch; //46 Direction of orbital prograde,
-        public UInt16 ProgradeHeading;//47 relative to vessel attitude
-        public UInt16 NormalPitch;   //48 Direction of orbit normal,
-        public UInt16 NormalHeading; //49 relative to vessel attitude
-        public UInt16 RadialPitch;   //50 Direction of orbit radial,
-        public UInt16 RadialHeading; //51 relative to vessel attitude
-        public UInt16 ProgradeSPitch; //52 Direction of surface prograde,
-        public UInt16 ProgradeSHeading;//53 relative to vessel attitude
-        public UInt16 TargetPitch; //54 Direction of target prograde
-        public UInt16 TargetHeading; //55 relative to vessel attitude
-        public UInt16 ManeuverPitch; //56 Direction of maneuver
-        public UInt16 ManeuverHeading; //57 relative to vessel attitude
+        public UInt16 ProgradeRoll; //47  relative to vessel attitude
+        public UInt16 ProgradeHeading;//48
+        public UInt16 ProgradeSPitch; //49 Direction of surface prograde,
+        public UInt16 ProgradeSRoll; //50  relative to vessel attitude
+        public UInt16 ProgradeSHeading;//51
+        public UInt16 TargetPitch;  //52 Direction of target prograde
+        public UInt16 TargetRoll;   //53 relative to vessel attitude
+        public UInt16 TargetHeading; //54 relative to vessel attitude
+        public UInt16 ManeuverPitch; //55 Direction of maneuver
+        public UInt16 ManeuverRoll;  //56 relative to vessel attitude
+        public UInt16 ManeuverHeading; //57
         public UInt16 ActionGroups; //58  status bit order:SAS, RCS, Light, Gear, Brakes, Abort, Custom01 - 10 
         public byte SOINumber;      //59  SOI Number (decimal format: sun-planet-moon e.g. 130 = kerbin, 131 = mun)
         public byte MaxOverHeat;    //60  Max part overheat (% percent)
@@ -187,6 +187,7 @@ namespace KSPSerialIO
         public static int ThrottleEnable;
         public static int WheelThrottleEnable;
         public static double SASTol;
+        public static int VectorMode;
 
         void Awake()
         {
@@ -237,6 +238,9 @@ namespace KSPSerialIO
 
             SASTol = cfg.GetValue<double>("SASTol");
             print("KSPSerialIO: SAS Tol = " + SASTol.ToString());
+
+            VectorMode = cfg.GetValue<double>("VectorMode");
+            print("KSPSerialIO: Vector Mode = " + VectorMode.ToString());
         }
     }
 
