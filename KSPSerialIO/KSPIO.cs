@@ -758,7 +758,7 @@ namespace KSPSerialIO
                 //Debug.Log("KSPSerialIO: 1");
                 //If the current active vessel is not what we were using, we need to remove controls from the old 
                 //vessel and attache it to the current one
-                if (ActiveVessel.id != FlightGlobals.ActiveVessel.id)
+                if (ActiveVessel != null && ActiveVessel.id != FlightGlobals.ActiveVessel.id)
                 {
                     ActiveVessel.OnPostAutopilotUpdate -= AxisInput;
                     ActiveVessel = FlightGlobals.ActiveVessel;
@@ -1427,7 +1427,6 @@ namespace KSPSerialIO
                     var engineModuleFx = module as ModuleEnginesFX;
                     if (engineModuleFx != null)
                     {
-                        var engineMod = engineModuleFx;
                         if (engineModuleFx.getIgnitionState)
                         {
                             retList.Add(part);
