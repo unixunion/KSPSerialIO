@@ -7,7 +7,7 @@ using System.Threading;
 using Microsoft.Win32;
 using System.Runtime.InteropServices;
 
-using OpenNETCF.IO.Ports;
+using Psimax.IO.Ports;
 using UnityEngine;
 using KSP.IO;
 using KSP.UI.Screens;
@@ -289,7 +289,7 @@ namespace KSPSerialIO
         {
             Port = new SerialPort(PortNumber, SettingsNStuff.BaudRate, Parity.None, 8, StopBits.One);
             Port.ReceivedBytesThreshold = 3;
-            Port.ReceivedEvent += Port_ReceivedEvent;
+            Port.DataReceived += Port_ReceivedEvent;
         }
 
         //these are copied from the intarwebs, converts struct to byte array
@@ -480,7 +480,7 @@ namespace KSPSerialIO
             return result;
         }
 
-        private void Port_ReceivedEvent(object sender, SerialReceivedEventArgs e)
+        private void Port_ReceivedEvent(object sender, SerialDataReceivedEventArgs e)
         {
             while (Port.BytesToRead > 0)
             {
@@ -661,7 +661,7 @@ namespace KSPSerialIO
             if (KSPSerialPort.Port.IsOpen)
             {
                 KSPSerialPort.Port.Close();
-                Port.ReceivedEvent -= Port_ReceivedEvent;
+                Port.DataReceived -= Port_ReceivedEvent;
                 Debug.Log("KSPSerialIO: Port closed");
             }
         }
