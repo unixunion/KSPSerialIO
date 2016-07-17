@@ -248,7 +248,10 @@ namespace KSPSerialIO
         public static VesselControls VControls = new VesselControls();
         public static VesselControls VControlsOld = new VesselControls();
 
-        private static byte[] buffer = new byte[255];
+        private const int MaxPayloadSize = 255;
+        private const int MaxPacketSize = MaxPayloadSize + 4;
+        private static byte[] PacketBuffer = new byte[MaxPacketSize];
+        private static byte[] PayloadBuffer = new byte[MaxPayloadSize];
         private static byte rx_len;
         private static byte rx_array_inx;
         private static int structSize;
@@ -358,7 +361,9 @@ namespace KSPSerialIO
             {
                 Debug.Log("KSPSerialIO: Version 0.18.2");
                 Debug.Log("KSPSerialIO: Getting serial ports...");
-                Debug.Log("KSPSerialIO: Output packet size: " + Marshal.SizeOf(VData).ToString() + "/255");
+                Debug.Log(String.Format("KSPSerialIO: Output packet size: {0}/{1}",
+                                        Marshal.SizeOf(VData).ToString(),
+                                        MaxPayloadSize));
                 initializeDataPackets();
 
                 try
@@ -473,7 +478,7 @@ namespace KSPSerialIO
                     switch (id)
                     {
                         case HSPid:
-                            HPacket = (HandShakePacket)ByteArrayToStructure(buffer, HPacket);
+                            HPacket = (HandShakePacket)ByteArrayToStructure(PayloadBuffer, HPacket);
                             Invoke("HandShake", 0);
 
                             if ((HPacket.M1 == 3) && (HPacket.M2 == 1) && (HPacket.M3 == 4))
@@ -542,9 +547,9 @@ namespace KSPSerialIO
             {
                 while (Port.BytesToRead > 0 && rx_array_inx <= rx_len)
                 {
-                    buffer[rx_array_inx++] = (byte)Port.ReadByte();
+                    PayloadBuffer[rx_array_inx++] = (byte)Port.ReadByte();
                 }
-                buffer[0] = id;
+                PayloadBuffer[0] = id;
 
                 if (rx_len == (rx_array_inx - 1))
                 {
@@ -553,10 +558,10 @@ namespace KSPSerialIO
                     calc_CS = rx_len;
                     for (int i = 0; i < rx_len; i++)
                     {
-                        calc_CS ^= buffer[i];
+                        calc_CS ^= PayloadBuffer[i];
                     }
 
-                    if (calc_CS == buffer[rx_array_inx - 1])
+                    if (calc_CS == PayloadBuffer[rx_array_inx - 1])
                     {//CS good
                         rx_len = 0;
                         rx_array_inx = 1;
@@ -582,7 +587,7 @@ namespace KSPSerialIO
 
         private void VesselControls()
         {
-            CPacket = (ControlPacket)ByteArrayToStructure(buffer, CPacket);
+            CPacket = (ControlPacket)ByteArrayToStructure(PayloadBuffer, CPacket);
 
             VControls.SAS = BitMathByte(CPacket.MainControls, 7);
             VControls.RCS = BitMathByte(CPacket.MainControls, 6);
