@@ -1428,7 +1428,6 @@ namespace KSPSerialIO
                     var engineModuleFx = module as ModuleEnginesFX;
                     if (engineModuleFx != null)
                     {
-                        var engineMod = engineModuleFx;
                         if (engineModuleFx.getIgnitionState)
                         {
                             retList.Add(part);
