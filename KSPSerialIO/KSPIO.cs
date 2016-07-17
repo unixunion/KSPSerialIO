@@ -464,22 +464,6 @@ namespace KSPSerialIO
             }
         }
 
-        private string readline()
-        {
-            string result = null;
-            char c;
-            int j = 0;
-
-            c = (char)Port.ReadByte();
-            while (c != '\n' && j < 255)
-            {
-                result += c;
-                c = (char)Port.ReadByte();
-                j++;
-            }
-            return result;
-        }
-
         private void Port_ReceivedEvent(object sender, SerialDataReceivedEventArgs e)
         {
             while (Port.BytesToRead > 0)
