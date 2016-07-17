@@ -256,6 +256,7 @@ namespace KSPSerialIO
             CS // Waiting for checksum
         }
         private static ReceiveStates CurrentState = ReceiveStates.FIRSTHEADER;
+
         private const int MaxPayloadSize = 255;
         private static byte[] PayloadBuffer = new byte[MaxPayloadSize];
         private static byte rx_len;
@@ -774,8 +775,8 @@ namespace KSPSerialIO
                 ActiveVessel.ActionGroups.SetGroup(KSPActionGroup.Custom10, KSPSerialPort.VControls.ControlGroup[10]);
 
                 /*
-                ActiveVessel.OnFlyByWire -= new FlightInputCallback(AxisInput);
-                ActiveVessel.OnFlyByWire += new FlightInputCallback(AxisInput);
+                  ActiveVessel.OnFlyByWire -= new FlightInputCallback(AxisInput);
+                  ActiveVessel.OnFlyByWire += new FlightInputCallback(AxisInput);
                 */
                 ActiveVessel.OnPostAutopilotUpdate -= AxisInput;
                 ActiveVessel.OnPostAutopilotUpdate += AxisInput;
@@ -942,16 +943,16 @@ namespace KSPSerialIO
                     #region debugjunk
                     
                     /*
-                    Debug.Log("KSPSerialIO: Stage " + KSPSerialPort.VData.CurrentStage.ToString() + ' ' +
-                        KSPSerialPort.VData.TotalStage.ToString()); 
-                    Debug.Log("KSPSerialIO: Overheat " + KSPSerialPort.VData.MaxOverHeat.ToString());
-                    Debug.Log("KSPSerialIO: Mach " + KSPSerialPort.VData.MachNumber.ToString());
-                    Debug.Log("KSPSerialIO: IAS " + KSPSerialPort.VData.IAS.ToString());
+                      Debug.Log("KSPSerialIO: Stage " + KSPSerialPort.VData.CurrentStage.ToString() + ' ' +
+                      KSPSerialPort.VData.TotalStage.ToString()); 
+                      Debug.Log("KSPSerialIO: Overheat " + KSPSerialPort.VData.MaxOverHeat.ToString());
+                      Debug.Log("KSPSerialIO: Mach " + KSPSerialPort.VData.MachNumber.ToString());
+                      Debug.Log("KSPSerialIO: IAS " + KSPSerialPort.VData.IAS.ToString());
                     
-                    Debug.Log("KSPSerialIO: SOI " + ActiveVessel.orbit.referenceBody.name + KSPSerialPort.VData.SOINumber.ToString());
+                      Debug.Log("KSPSerialIO: SOI " + ActiveVessel.orbit.referenceBody.name + KSPSerialPort.VData.SOINumber.ToString());
                     
-                    ScreenMessages.PostScreenMessage(KSPSerialPort.VData.OxidizerS.ToString() + "/" + KSPSerialPort.VData.OxidizerTotS +
-                        "   " + KSPSerialPort.VData.Oxidizer.ToString() + "/" + KSPSerialPort.VData.OxidizerTot);
+                      ScreenMessages.PostScreenMessage(KSPSerialPort.VData.OxidizerS.ToString() + "/" + KSPSerialPort.VData.OxidizerTotS +
+                      "   " + KSPSerialPort.VData.Oxidizer.ToString() + "/" + KSPSerialPort.VData.OxidizerTot);
                     */
                     //KSPSerialPort.VData.Roll = Mathf.Atan2(2 * (x * y + w * z), w * w + x * x - y * y - z * z) * 180 / Mathf.PI;
                     //KSPSerialPort.VData.Pitch = Mathf.Atan2(2 * (y * z + w * x), w * w - x * x - y * y + z * z) * 180 / Mathf.PI;
@@ -968,8 +969,8 @@ namespace KSPSerialIO
                     //ScreenMessages.PostScreenMessage(KSPSerialPort.VData.RAlt.ToString());
                     //KSPSerialPort.Port.WriteLine("Success!");
                     /*
-                    ScreenMessages.PostScreenMessage(KSPSerialPort.VData.LiquidFuelS.ToString() + "/" + KSPSerialPort.VData.LiquidFuelTotS +
-                        "   " + KSPSerialPort.VData.LiquidFuel.ToString() + "/" + KSPSerialPort.VData.LiquidFuelTot);
+                      ScreenMessages.PostScreenMessage(KSPSerialPort.VData.LiquidFuelS.ToString() + "/" + KSPSerialPort.VData.LiquidFuelTotS +
+                      "   " + KSPSerialPort.VData.LiquidFuel.ToString() + "/" + KSPSerialPort.VData.LiquidFuelTot);
                     */
                     #endregion
                     KSPSerialPort.sendPacket(KSPSerialPort.VData);
@@ -979,24 +980,24 @@ namespace KSPSerialIO
                 if (KSPSerialPort.ControlReceived)
                 {
                     /*
-                     ScreenMessages.PostScreenMessage("SAS: " + KSPSerialPort.VControls.SAS.ToString() +
-                     ", RCS: " + KSPSerialPort.VControls.RCS.ToString() +
-                     ", Lights: " + KSPSerialPort.VControls.Lights.ToString() +
-                     ", Gear: " + KSPSerialPort.VControls.Gear.ToString() +
-                     ", Brakes: " + KSPSerialPort.VControls.Brakes.ToString() +
-                     ", Precision: " + KSPSerialPort.VControls.Precision.ToString() +
-                     ", Abort: " + KSPSerialPort.VControls.Abort.ToString() +
-                     ", Stage: " + KSPSerialPort.VControls.Stage.ToString(), 10f, KSPIOScreenStyle);
+                      ScreenMessages.PostScreenMessage("SAS: " + KSPSerialPort.VControls.SAS.ToString() +
+                      ", RCS: " + KSPSerialPort.VControls.RCS.ToString() +
+                      ", Lights: " + KSPSerialPort.VControls.Lights.ToString() +
+                      ", Gear: " + KSPSerialPort.VControls.Gear.ToString() +
+                      ", Brakes: " + KSPSerialPort.VControls.Brakes.ToString() +
+                      ", Precision: " + KSPSerialPort.VControls.Precision.ToString() +
+                      ", Abort: " + KSPSerialPort.VControls.Abort.ToString() +
+                      ", Stage: " + KSPSerialPort.VControls.Stage.ToString(), 10f, KSPIOScreenStyle);
                     
-                     Debug.Log("KSPSerialIO: SAS: " + KSPSerialPort.VControls.SAS.ToString() +
-                     ", RCS: " + KSPSerialPort.VControls.RCS.ToString() +
-                     ", Lights: " + KSPSerialPort.VControls.Lights.ToString() +
-                     ", Gear: " + KSPSerialPort.VControls.Gear.ToString() +
-                     ", Brakes: " + KSPSerialPort.VControls.Brakes.ToString() +
-                     ", Precision: " + KSPSerialPort.VControls.Precision.ToString() +
-                     ", Abort: " + KSPSerialPort.VControls.Abort.ToString() +
-                     ", Stage: " + KSPSerialPort.VControls.Stage.ToString());
-                     */
+                      Debug.Log("KSPSerialIO: SAS: " + KSPSerialPort.VControls.SAS.ToString() +
+                      ", RCS: " + KSPSerialPort.VControls.RCS.ToString() +
+                      ", Lights: " + KSPSerialPort.VControls.Lights.ToString() +
+                      ", Gear: " + KSPSerialPort.VControls.Gear.ToString() +
+                      ", Brakes: " + KSPSerialPort.VControls.Brakes.ToString() +
+                      ", Precision: " + KSPSerialPort.VControls.Precision.ToString() +
+                      ", Abort: " + KSPSerialPort.VControls.Abort.ToString() +
+                      ", Stage: " + KSPSerialPort.VControls.Stage.ToString());
+                    */
                     
                     //if (FlightInputHandler.RCSLock != KSPSerialPort.VControls.RCS)
                     if (KSPSerialPort.VControls.RCS != KSPSerialPort.VControlsOld.RCS)
@@ -1187,17 +1188,17 @@ namespace KSPSerialIO
                         R.Max += (float)pr.maxAmount;
 
                         /* shit doesn't work
-                        int stageno = p.inverseStage;
+                           int stageno = p.inverseStage;
                         
-                        Debug.Log(pr.resourceName + "  " + stageno.ToString() + "  " + Staging.CurrentStage.ToString());
+                           Debug.Log(pr.resourceName + "  " + stageno.ToString() + "  " + Staging.CurrentStage.ToString());
 
-                        //if (p.inverseStage == Staging.CurrentStage + 1)
-                        if (stageno == Staging.CurrentStage)
-                        {                            
-                            R.CurrentStage += (float)pr.amount;
-                            R.MaxStage += (float)pr.maxAmount;
-                        }
-                         */
+                           //if (p.inverseStage == Staging.CurrentStage + 1)
+                           if (stageno == Staging.CurrentStage)
+                           {                            
+                           R.CurrentStage += (float)pr.amount;
+                           R.MaxStage += (float)pr.maxAmount;
+                           }
+                        */
                         break;
                     }
                 }
@@ -1213,125 +1214,125 @@ namespace KSPSerialIO
         {
 			switch (SettingsNStuff.ThrottleEnable)
 			{
-			case 1:
-				s.mainThrottle = KSPSerialPort.VControls.Throttle;
-				break;
-			case 2:
-				if (s.mainThrottle == 0)
-				{
-					s.mainThrottle = KSPSerialPort.VControls.Throttle;
-				}
-				break;
-			case 3:
-				if (KSPSerialPort.VControls.Throttle != 0)
-				{
-					s.mainThrottle = KSPSerialPort.VControls.Throttle;
-				}
-				break;
-			default:
-				break;
+                case 1:
+                    s.mainThrottle = KSPSerialPort.VControls.Throttle;
+                    break;
+                case 2:
+                    if (s.mainThrottle == 0)
+                    {
+                        s.mainThrottle = KSPSerialPort.VControls.Throttle;
+                    }
+                    break;
+                case 3:
+                    if (KSPSerialPort.VControls.Throttle != 0)
+                    {
+                        s.mainThrottle = KSPSerialPort.VControls.Throttle;
+                    }
+                    break;
+                default:
+                    break;
 			}
 
 			switch (SettingsNStuff.PitchEnable)
 			{
-			case 1:
-				s.pitch = KSPSerialPort.VControls.Pitch;
-				break;
-			case 2:
-				if (s.pitch == 0)
-					s.pitch = KSPSerialPort.VControls.Pitch;
-				break;
-			case 3:
-				if (KSPSerialPort.VControls.Pitch != 0)
-					s.pitch = KSPSerialPort.VControls.Pitch;
-				break;
-			default:
-				break;
+                case 1:
+                    s.pitch = KSPSerialPort.VControls.Pitch;
+                    break;
+                case 2:
+                    if (s.pitch == 0)
+                        s.pitch = KSPSerialPort.VControls.Pitch;
+                    break;
+                case 3:
+                    if (KSPSerialPort.VControls.Pitch != 0)
+                        s.pitch = KSPSerialPort.VControls.Pitch;
+                    break;
+                default:
+                    break;
 			}
 
 			switch (SettingsNStuff.RollEnable)
 			{
-			case 1:
-				s.roll = KSPSerialPort.VControls.Roll;
-				break;
-			case 2:
-				if (s.roll == 0)
-					s.roll = KSPSerialPort.VControls.Roll;
-				break;
-			case 3:
-				if (KSPSerialPort.VControls.Roll != 0)
-					s.roll = KSPSerialPort.VControls.Roll;
-				break;
-			default:
-				break;
+                case 1:
+                    s.roll = KSPSerialPort.VControls.Roll;
+                    break;
+                case 2:
+                    if (s.roll == 0)
+                        s.roll = KSPSerialPort.VControls.Roll;
+                    break;
+                case 3:
+                    if (KSPSerialPort.VControls.Roll != 0)
+                        s.roll = KSPSerialPort.VControls.Roll;
+                    break;
+                default:
+                    break;
 			}
 
 			switch (SettingsNStuff.YawEnable)
 			{
-			case 1:
-				s.yaw = KSPSerialPort.VControls.Yaw;
-				break;
-			case 2:
-				if (s.yaw == 0)
-					s.yaw = KSPSerialPort.VControls.Yaw;
-				break;
-			case 3:
-				if (KSPSerialPort.VControls.Yaw != 0)
-					s.yaw = KSPSerialPort.VControls.Yaw;
-				break;
-			default:
-				break;
+                case 1:
+                    s.yaw = KSPSerialPort.VControls.Yaw;
+                    break;
+                case 2:
+                    if (s.yaw == 0)
+                        s.yaw = KSPSerialPort.VControls.Yaw;
+                    break;
+                case 3:
+                    if (KSPSerialPort.VControls.Yaw != 0)
+                        s.yaw = KSPSerialPort.VControls.Yaw;
+                    break;
+                default:
+                    break;
 			}
 
 			switch (SettingsNStuff.TXEnable)
 			{
-			case 1:
-				s.X = KSPSerialPort.VControls.TX;
-				break;
-			case 2:
-				if (s.X == 0)
-					s.X = KSPSerialPort.VControls.TX;
-				break;
-			case 3:
-				if (KSPSerialPort.VControls.TX != 0)
-					s.X = KSPSerialPort.VControls.TX;
-				break;
-			default:
-				break;
+                case 1:
+                    s.X = KSPSerialPort.VControls.TX;
+                    break;
+                case 2:
+                    if (s.X == 0)
+                        s.X = KSPSerialPort.VControls.TX;
+                    break;
+                case 3:
+                    if (KSPSerialPort.VControls.TX != 0)
+                        s.X = KSPSerialPort.VControls.TX;
+                    break;
+                default:
+                    break;
 			}
 
 			switch (SettingsNStuff.TYEnable)
 			{
-			case 1:
-				s.Y = KSPSerialPort.VControls.TY;
-				break;
-			case 2:
-				if (s.Y == 0)
-					s.Y = KSPSerialPort.VControls.TY;
-				break;
-			case 3:
-				if (KSPSerialPort.VControls.TY != 0)
-					s.Y = KSPSerialPort.VControls.TY;
-				break;
-			default:
-				break;
+                case 1:
+                    s.Y = KSPSerialPort.VControls.TY;
+                    break;
+                case 2:
+                    if (s.Y == 0)
+                        s.Y = KSPSerialPort.VControls.TY;
+                    break;
+                case 3:
+                    if (KSPSerialPort.VControls.TY != 0)
+                        s.Y = KSPSerialPort.VControls.TY;
+                    break;
+                default:
+                    break;
 			}
 
 			switch (SettingsNStuff.TZEnable)
 			{
-			case 1:
-				s.Z = KSPSerialPort.VControls.TZ;
-				break;
-			case 2:
-				if (s.Z == 0)
-					s.Z = KSPSerialPort.VControls.TZ;
-				break;
-			case 3:
-				if (KSPSerialPort.VControls.TZ != 0)
-					s.Z = KSPSerialPort.VControls.TZ;
-				break;
-			default:
-				break;
+                case 1:
+                    s.Z = KSPSerialPort.VControls.TZ;
+                    break;
+                case 2:
+                    if (s.Z == 0)
+                        s.Z = KSPSerialPort.VControls.TZ;
+                    break;
+                case 3:
+                    if (KSPSerialPort.VControls.TZ != 0)
+                        s.Z = KSPSerialPort.VControls.TZ;
+                    break;
+                default:
+                    break;
 			}
 
             switch (SettingsNStuff.WheelSteerEnable)
@@ -1515,11 +1516,11 @@ namespace KSPSerialIO
             foreach (AttachNode attachNode in part.attachNodes)
             {
                 if (attachNode.attachedPart != null //if there is a part attached here
-                        && attachNode.nodeType == AttachNode.NodeType.Stack //and the attached part is stacked (rather than surface mounted)
-                        && (attachNode.attachedPart.fuelCrossFeed //and the attached part allows fuel flow
-                            )
-                        && !(part.NoCrossFeedNodeKey.Length > 0 //and this part does not forbid fuel flow
-                                && attachNode.id.Contains(part.NoCrossFeedNodeKey))) // through this particular node
+                    && attachNode.nodeType == AttachNode.NodeType.Stack //and the attached part is stacked (rather than surface mounted)
+                    && (attachNode.attachedPart.fuelCrossFeed //and the attached part allows fuel flow
+                        )
+                    && !(part.NoCrossFeedNodeKey.Length > 0 //and this part does not forbid fuel flow
+                         && attachNode.id.Contains(part.NoCrossFeedNodeKey))) // through this particular node
                 {
 
 
@@ -1572,11 +1573,11 @@ namespace KSPSerialIO
             foreach (AttachNode attachNode in part.attachNodes)
             {
                 if (attachNode.attachedPart != null //if there is a part attached here
-                        && attachNode.nodeType == AttachNode.NodeType.Stack //and the attached part is stacked (rather than surface mounted)
-                        && (attachNode.attachedPart.fuelCrossFeed //and the attached part allows fuel flow
-                            )
-                        && !(part.NoCrossFeedNodeKey.Length > 0 //and this part does not forbid fuel flow
-                                && attachNode.id.Contains(part.NoCrossFeedNodeKey))) // through this particular node
+                    && attachNode.nodeType == AttachNode.NodeType.Stack //and the attached part is stacked (rather than surface mounted)
+                    && (attachNode.attachedPart.fuelCrossFeed //and the attached part allows fuel flow
+                        )
+                    && !(part.NoCrossFeedNodeKey.Length > 0 //and this part does not forbid fuel flow
+                         && attachNode.id.Contains(part.NoCrossFeedNodeKey))) // through this particular node
                 {
 
 
