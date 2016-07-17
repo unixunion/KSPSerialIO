@@ -248,9 +248,15 @@ namespace KSPSerialIO
         public static VesselControls VControls = new VesselControls();
         public static VesselControls VControlsOld = new VesselControls();
 
+        enum ReceiveStates: byte {
+            FIRSTHEADER, // Waiting for first header
+            SECONDHEADER, // Waiting for second header
+            SIZE, // Waiting for payload size
+            PAYLOAD, // Waiting for rest of payload
+            CS // Waiting for checksum
+        }
+        private static ReceiveStates CurrentState = ReceiveStates.FIRSTHEADER;
         private const int MaxPayloadSize = 255;
-        private const int MaxPacketSize = MaxPayloadSize + 4;
-        private static byte[] PacketBuffer = new byte[MaxPacketSize];
         private static byte[] PayloadBuffer = new byte[MaxPayloadSize];
         private static byte rx_len;
         private static byte rx_array_inx;
@@ -293,6 +299,45 @@ namespace KSPSerialIO
             Port = new SerialPort(PortNumber, SettingsNStuff.BaudRate, Parity.None, 8, StopBits.One);
             Port.ReceivedBytesThreshold = 3;
             Port.DataReceived += Port_ReceivedEvent;
+        }
+
+        private void ReceivedDataEvent(byte[] ReadBuffer, int BufferLength)
+        {
+            for (int x=0; x<BufferLength; x++)
+            {
+                switch(CurrentState)
+                {
+                    case ReceiveStates.FIRSTHEADER:
+                        if (ReadBuffer[x] == 0xBE)
+                        {
+                            CurrentState = ReceiveStates.SECONDHEADER;
+                        }
+                        break;
+                    case ReceiveStates.SECONDHEADER:
+                        if (ReadBuffer[x] == 0xEF)
+                        {
+                            CurrentState = ReceiveStates.SIZE;
+                        } else
+                        {
+                            CurrentState = ReceiveStates.FIRSTHEADER;
+                        }
+                        break;
+                    case ReceiveStates.SIZE:
+                        // make inbound packet size == current byte
+                        CurrentState = ReceiveStates.PAYLOAD;
+                        break;
+                    case ReceiveStates.PAYLOAD:
+                        // append current byte to the payload buffer
+                        // then, if payload buffer size == inbound packet size
+                        // Change CurrentState to CS
+                        break;
+                    case ReceiveStates.CS:
+                        // Current byte is checksum.
+                        // Now we have a full packet.
+                        CurrentState = ReceiveStates.FIRSTHEADER;
+                        break;
+                }
+            }
         }
 
         //these are copied from the intarwebs, converts struct to byte array
