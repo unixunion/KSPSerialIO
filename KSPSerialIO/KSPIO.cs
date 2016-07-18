@@ -270,31 +270,32 @@ namespace KSPSerialIO
 
         private const byte HSPid = 0, VDid = 1, Cid = 101; //hard coded values for packet IDS
 
-
-        public static void Update()
-        {
-            InboundPacketHandler();
-        }
-
         public static void InboundPacketHandler()
         {
             Debug.Log("In KSPSerialIO.KSPSerialPort.InboundPacketHandler");
-            if (NewPacket)
+            if (true)
             {
                 switch (NewPacketBuffer[0])
                 {
                     case HSPid:
-                        //HPacket = (HandShakePacket)ByteArrayToStructure(NewPacketBuffer
                         Debug.Log("Got a handshake packet.");
+                        HPacket = (HandShakePacket)ByteArrayToStructure(NewPacketBuffer, HPacket);
+                        HandShake();
+                        if ((HPacket.M1 == 3) && (HPacket.M2 == 1) && (HPacket.M3 == 4)) {
+                            DisplayFound = true;
+                        } else
+                        {
+                            DisplayFound = false;
+                        }
                         break;
                     case Cid:
                         Debug.Log("Got a vessel data packet.");
+                        VesselControls();
                         break;
                     default:
-                        Debug.Log("KSPSerialIO: Packet id unimplemented");
+                        Debug.Log("KSPSerialIO: Packet id unimplementd");
                         break;
                 }
-                NewPacket = false;
             }
         }
 
@@ -370,6 +371,7 @@ namespace KSPSerialIO
 
         private void ReceivedDataEvent(byte[] ReadBuffer, int BufferLength)
         {
+            Debug.Log("In ReceivedDataEvent");
             for (int x=0; x<BufferLength; x++)
             {
                 switch(CurrentState)
@@ -405,8 +407,9 @@ namespace KSPSerialIO
                     case ReceiveStates.CS:
                         if (CompareChecksum(ReadBuffer[x]))
                         {
+                            Debug.Log("Got valid packet, calling inboundpackethandler()");
                             Buffer.BlockCopy(PayloadBuffer, 0, NewPacketBuffer, 0, CurrentBytesRead);
-                            NewPacket = true;
+                            InboundPacketHandler();
                         }
                         CurrentState = ReceiveStates.FIRSTHEADER;
                         break;
@@ -558,10 +561,9 @@ namespace KSPSerialIO
 
                                 //wait for reply
                                 int k = 0;
-                                while (k < 150 && !DisplayFound)
+                                while (k < 15 && !DisplayFound)
                                 {
-                                    InboundPacketHandler();
-                                    Thread.Sleep(10);
+                                    Thread.Sleep(100);
                                     k++;
                                 }
 
@@ -707,12 +709,12 @@ namespace KSPSerialIO
             return false;
         }
 
-        private void HandShake()
+        private static void HandShake()
         {
             Debug.Log("KSPSerialIO: Handshake received - " + HPacket.M1.ToString() + HPacket.M2.ToString() + HPacket.M3.ToString());
         }
 
-        private void VesselControls()
+        private static void VesselControls()
         {
             CPacket = (ControlPacket)ByteArrayToStructure(PayloadBuffer, CPacket);
 
@@ -743,12 +745,12 @@ namespace KSPSerialIO
             //Debug.Log("KSPSerialIO: ControlPacket received");
         }
 
-        private Boolean BitMathByte(byte x, int n)
+        private static Boolean BitMathByte(byte x, int n)
         {
             return ((x >> n) & 1) == 1;
         }
 
-        private Boolean BitMathUshort(ushort x, int n)
+        private static Boolean BitMathUshort(ushort x, int n)
         {
             return ((x >> n) & 1) == 1;
         }
