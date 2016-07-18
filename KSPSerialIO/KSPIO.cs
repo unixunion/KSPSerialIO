@@ -261,7 +261,8 @@ namespace KSPSerialIO
         private const int MaxPayloadSize = 255;
         private static byte[] PayloadBuffer = new byte[MaxPayloadSize];
         private static volatile byte[] NewPacketBuffer = new byte[MaxPayloadSize];
-        private static volatile bool NewPacket = false;
+        private static volatile Boolean NewPacket = false;
+        private static Thread SerialThread;
         private static byte rx_len;
         private static byte rx_array_inx;
         private static int structSize;
@@ -303,6 +304,31 @@ namespace KSPSerialIO
             Port = new SerialPort(PortNumber, SettingsNStuff.BaudRate, Parity.None, 8, StopBits.One);
             Port.ReceivedBytesThreshold = 3;
             Port.DataReceived += Port_ReceivedEvent;
+        }
+
+        private void SerialWorker()
+        {
+            byte[] buffer = new byte[MaxPayloadSize + 4];
+            Action kickoffRead = null;
+
+            kickoffRead = delegate {
+                Port.BaseStream.BeginRead(buffer, 0, buffer.Length, delegate (IAsyncResult ar) {
+                        try
+                        {
+                            int actualLength = Port.BaseStream.EndRead(ar);
+                            byte[] received = new byte[actualLength];
+                            Buffer.BlockCopy(buffer, 0, received, 0, actualLength);
+                            ReceivedDataEvent(received, actualLength);
+                        }
+                        catch (IOException exc)
+                        {
+                            Debug.Log("IOException in SerialWorker :(");
+                            Debug.Log(exc.ToString());
+                        }
+                        kickoffRead();
+                    }, null);
+            };
+            kickoffRead();
         }
 
         private void ReceivedDataEvent(byte[] ReadBuffer, int BufferLength)
@@ -351,7 +377,7 @@ namespace KSPSerialIO
             }
         }
 
-        private static bool CompareChecksum(byte readCS)
+        private static Boolean CompareChecksum(byte readCS)
         {
             byte calcCS = CurrentPacketLength;
             for (int i=0; i<CurrentPacketLength; i++)
@@ -569,7 +595,7 @@ namespace KSPSerialIO
             }
         }
 
-        private static bool processCOM()
+        private static Boolean processCOM()
         {
             byte calc_CS;
 
@@ -703,7 +729,7 @@ namespace KSPSerialIO
         }
 
 
-        public static void ControlStatus(int n, bool s)
+        public static void ControlStatus(int n, Boolean s)
         {
             if (s)
                 VData.ActionGroups |= (UInt16)(1 << n);       // forces nth bit of x to be 1.  all other bits left alone.
