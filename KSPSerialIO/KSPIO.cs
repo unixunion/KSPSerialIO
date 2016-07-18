@@ -261,12 +261,7 @@ namespace KSPSerialIO
         private const int MaxPayloadSize = 255;
         private static byte[] PayloadBuffer = new byte[MaxPayloadSize];
         private static volatile byte[] NewPacketBuffer = new byte[MaxPayloadSize];
-        private static volatile Boolean NewPacket = false;
         private static Thread SerialThread;
-        private static byte rx_len;
-        private static byte rx_array_inx;
-        private static int structSize;
-        private static byte id = 255;
 
         private const byte HSPid = 0, VDid = 1, Cid = 101; //hard coded values for packet IDS
 
@@ -357,7 +352,7 @@ namespace KSPSerialIO
                             kickoffRead();
                         }, null);
                 }
-                catch (InvalidOperationException exc)
+                catch (InvalidOperationException)
                 {
                     Debug.Log("KSPSerialIO: Trying to read port that isn't open. Sleeping");
                     Thread.Sleep(500);
@@ -596,117 +591,6 @@ namespace KSPSerialIO
             }
         }
 
-        private void Port_ReceivedEvent(object sender, SerialDataReceivedEventArgs e)
-        {
-            while (Port.BytesToRead > 0)
-            {
-                if (processCOM())
-                {
-                    switch (id)
-                    {
-                        case HSPid:
-                            HPacket = (HandShakePacket)ByteArrayToStructure(PayloadBuffer, HPacket);
-                            Invoke("HandShake", 0);
-
-                            if ((HPacket.M1 == 3) && (HPacket.M2 == 1) && (HPacket.M3 == 4))
-                            {
-                                DisplayFound = true;
-
-                            }
-                            else
-                            {
-                                DisplayFound = false;
-                            }
-                            break;
-                        case Cid:
-                            VesselControls();
-                            //Invoke("VesselControls", 0);
-                            break;
-                        default:
-                            Invoke("Unimplemented", 0);
-                            break;
-                    }
-                }
-            }
-        }
-
-        private static Boolean processCOM()
-        {
-            byte calc_CS;
-
-            if (rx_len == 0)
-            {
-                while (Port.ReadByte() != 0xBE)
-                {
-                    if (Port.BytesToRead == 0)
-                        return false;
-                }
-
-                if (Port.ReadByte() == 0xEF)
-                {
-                    rx_len = (byte)Port.ReadByte();
-                    id = (byte)Port.ReadByte();
-                    rx_array_inx = 1;
-
-                    switch (id)
-                    {
-                        case HSPid:
-                            structSize = Marshal.SizeOf(HPacket);
-                            break;
-                        case Cid:
-                            structSize = Marshal.SizeOf(CPacket);
-                            break;
-                    }
-
-                    //make sure the binary structs on both Arduino and plugin are the same size.
-                    if (rx_len != structSize || rx_len == 0)
-                    {
-                        rx_len = 0;
-                        return false;
-                    }
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                while (Port.BytesToRead > 0 && rx_array_inx <= rx_len)
-                {
-                    PayloadBuffer[rx_array_inx++] = (byte)Port.ReadByte();
-                }
-                PayloadBuffer[0] = id;
-
-                if (rx_len == (rx_array_inx - 1))
-                {
-                    //seem to have got whole message
-                    //last uint8_t is CS
-                    calc_CS = rx_len;
-                    for (int i = 0; i < rx_len; i++)
-                    {
-                        calc_CS ^= PayloadBuffer[i];
-                    }
-
-                    if (calc_CS == PayloadBuffer[rx_array_inx - 1])
-                    {//CS good
-                        rx_len = 0;
-                        rx_array_inx = 1;
-                        return true;
-                    }
-                    else
-                    {
-                        //failed checksum, need to clear this out anyway
-                        rx_len = 0;
-                        rx_array_inx = 1;
-                        return false;
-                    }
-                }
-            }
-
-            return false;
-        }
-
         private static void HandShake()
         {
             Debug.Log("KSPSerialIO: Handshake received - " + HPacket.M1.ToString() + HPacket.M2.ToString() + HPacket.M3.ToString());
@@ -777,7 +661,6 @@ namespace KSPSerialIO
             if (KSPSerialPort.Port.IsOpen)
             {
                 KSPSerialPort.Port.Close();
-                Port.DataReceived -= Port_ReceivedEvent;
                 Debug.Log("KSPSerialIO: Port closed");
             }
         }
