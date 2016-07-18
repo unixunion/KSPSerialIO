@@ -1,4 +1,5 @@
-XBUILD=/usr/local/bin/xbuild
+export PATH := /usr/local/bin:$(PATH)
+XBUILD=xbuild
 CONFIG=Release
 
 KSPDIR=/Users/peter/Library/Application\ Support/Steam/steamapps/common/Kerbal\ Space\ Program
