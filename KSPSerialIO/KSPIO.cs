@@ -271,6 +271,33 @@ namespace KSPSerialIO
         private const byte HSPid = 0, VDid = 1, Cid = 101; //hard coded values for packet IDS
 
 
+        public static void Update()
+        {
+            InboundPacketHandler();
+        }
+
+        public static void InboundPacketHandler()
+        {
+            Debug.Log("In KSPSerialIO.KSPSerialPort.InboundPacketHandler");
+            if (NewPacket)
+            {
+                switch (NewPacketBuffer[0])
+                {
+                    case HSPid:
+                        //HPacket = (HandShakePacket)ByteArrayToStructure(NewPacketBuffer
+                        Debug.Log("Got a handshake packet.");
+                        break;
+                    case Cid:
+                        Debug.Log("Got a vessel data packet.");
+                        break;
+                    default:
+                        Debug.Log("KSPSerialIO: Packet id unimplemented");
+                        break;
+                }
+                NewPacket = false;
+            }
+        }
+
         public static void sendPacket(object anything)
         {
             byte[] Payload = StructureToByteArray(anything);
@@ -302,31 +329,41 @@ namespace KSPSerialIO
         private void Begin()
         {
             Port = new SerialPort(PortNumber, SettingsNStuff.BaudRate, Parity.None, 8, StopBits.One);
-            Port.ReceivedBytesThreshold = 3;
-            Port.DataReceived += Port_ReceivedEvent;
+            SerialThread = new Thread(SerialWorker);
+            SerialThread.Start();
+            while (!SerialThread.IsAlive);
         }
 
         private void SerialWorker()
         {
             byte[] buffer = new byte[MaxPayloadSize + 4];
             Action kickoffRead = null;
-
+            Debug.Log("KSPSerialIO: Serial Worker thread started");
             kickoffRead = delegate {
-                Port.BaseStream.BeginRead(buffer, 0, buffer.Length, delegate (IAsyncResult ar) {
-                        try
-                        {
-                            int actualLength = Port.BaseStream.EndRead(ar);
-                            byte[] received = new byte[actualLength];
-                            Buffer.BlockCopy(buffer, 0, received, 0, actualLength);
-                            ReceivedDataEvent(received, actualLength);
-                        }
-                        catch (IOException exc)
-                        {
-                            Debug.Log("IOException in SerialWorker :(");
-                            Debug.Log(exc.ToString());
-                        }
-                        kickoffRead();
-                    }, null);
+                try
+                {
+                    Port.BaseStream.BeginRead(buffer, 0, buffer.Length, delegate (IAsyncResult ar) {
+                            try
+                            {
+                                int actualLength = Port.BaseStream.EndRead(ar);
+                                byte[] received = new byte[actualLength];
+                                Buffer.BlockCopy(buffer, 0, received, 0, actualLength);
+                                ReceivedDataEvent(received, actualLength);
+                            }
+                            catch (IOException exc)
+                            {
+                                Debug.Log("IOException in SerialWorker :(");
+                                Debug.Log(exc.ToString());
+                            }
+                            kickoffRead();
+                        }, null);
+                }
+                catch (InvalidOperationException exc)
+                {
+                    Debug.Log("KSPSerialIO: Trying to read port that isn't open. Sleeping");
+                    Thread.Sleep(500);
+                    kickoffRead();
+                }
             };
             kickoffRead();
         }
@@ -521,9 +558,10 @@ namespace KSPSerialIO
 
                                 //wait for reply
                                 int k = 0;
-                                while (Port.BytesToRead == 0 && k < 15 && !DisplayFound)
+                                while (k < 150 && !DisplayFound)
                                 {
-                                    Thread.Sleep(100);
+                                    InboundPacketHandler();
+                                    Thread.Sleep(10);
                                     k++;
                                 }
 
@@ -715,7 +753,7 @@ namespace KSPSerialIO
             return ((x >> n) & 1) == 1;
         }
 
-        private void Unimplemented()
+        private static void Unimplemented()
         {
             Debug.Log("KSPSerialIO: Packet id unimplemented");
         }
