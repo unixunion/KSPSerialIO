@@ -258,9 +258,10 @@ namespace KSPSerialIO
         private static ReceiveStates CurrentState = ReceiveStates.FIRSTHEADER;
         private static byte CurrentPacketLength;
         private static byte CurrentBytesRead;
-
         private const int MaxPayloadSize = 255;
         private static byte[] PayloadBuffer = new byte[MaxPayloadSize];
+        private static volatile byte[] NewPacketBuffer = new byte[MaxPayloadSize];
+        private static volatile bool NewPacket = false;
         private static byte rx_len;
         private static byte rx_array_inx;
         private static int structSize;
@@ -339,30 +340,11 @@ namespace KSPSerialIO
                         }
                         break;
                     case ReceiveStates.CS:
-                        switch(PayloadBuffer[0])
+                        if (CompareChecksum(ReadBuffer[x]))
                         {
-                            case HSPid:
-                                if (CompareChecksum(ReadBuffer[x]))
-                                {
-                                    // copy PayloadBuffer in to handshake
-                                    // packet and do handshaking
-                                }
-                                // TODO: Should I have an else here?
-                                break;
-                            case Cid:
-                                if (CompareChecksum(ReadBuffer[x]))
-                                {
-                                    // copy PayloadBuffer in to vessel
-                                    // control packet and control vessel
-                                }
-                                // TODO: else?
-                                break;
-                            default:
-                                Invoke("Unimplemented", 0);
-                                break;
+                            Buffer.BlockCopy(PayloadBuffer, 0, NewPacketBuffer, 0, CurrentBytesRead);
+                            NewPacket = true;
                         }
-                        // Current byte is checksum.
-                        // Now we have a full packet.
                         CurrentState = ReceiveStates.FIRSTHEADER;
                         break;
                 }
