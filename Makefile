@@ -29,5 +29,5 @@ package: all
 	cp KSPSerialIO/bin/$(CONFIG)/PsimaxSerial.dll $(PACKAGEDIR)
 	#cp ../PsimaxSerial/PsimaxSerial/bin/Release/Mono.Posix.dll $(PACKAGEDIR)
 	cp config.xml $(PACKAGECONFIGDIR)
-	cd package; zip -r -9 ../KSPSerialIO-$(PLUGINVERSION).zip KSPSerialIO
+	cd package; zip -r -9 ../KSPSerialIO-cross-$(PLUGINVERSION).zip KSPSerialIO
 	rm -r package
