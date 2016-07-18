@@ -267,29 +267,26 @@ namespace KSPSerialIO
 
         public static void InboundPacketHandler()
         {
-            if (true)
+            switch (NewPacketBuffer[0])
             {
-                switch (NewPacketBuffer[0])
-                {
-                    case HSPid:
-                        HPacket = (HandShakePacket)ByteArrayToStructure(NewPacketBuffer, HPacket);
-                        HandShake();
-                        if ((HPacket.M1 == 3) && (HPacket.M2 == 1) && (HPacket.M3 == 4)) {
-                            DisplayFound = true;
-                        } else
-                        {
-                            DisplayFound = false;
-                        }
-                        break;
-                    case Cid:
-                        Debug.Log("Got a vessel data packet.");
-                        VesselControls();
-                        break;
-                    default:
-                        Debug.Log("KSPSerialIO: Packet id unimplementd");
-                        break;
-                }
+                case HSPid:
+                    HPacket = (HandShakePacket)ByteArrayToStructure(NewPacketBuffer, HPacket);
+                    HandShake();
+                    if ((HPacket.M1 == 3) && (HPacket.M2 == 1) && (HPacket.M3 == 4)) {
+                        DisplayFound = true;
+                    } else
+                    {
+                        DisplayFound = false;
+                    }
+                    break;
+                case Cid:
+                    VesselControls();
+                    break;
+                default:
+                    Debug.Log("KSPSerialIO: Packet id unimplementd");
+                    break;
             }
+
         }
 
         public static void sendPacket(object anything)
@@ -364,7 +361,6 @@ namespace KSPSerialIO
 
         private void ReceivedDataEvent(byte[] ReadBuffer, int BufferLength)
         {
-            Debug.Log("In ReceivedDataEvent");
             for (int x=0; x<BufferLength; x++)
             {
                 switch(CurrentState)
@@ -400,7 +396,6 @@ namespace KSPSerialIO
                     case ReceiveStates.CS:
                         if (CompareChecksum(ReadBuffer[x]))
                         {
-                            Debug.Log("Got valid packet, calling inboundpackethandler()");
                             Buffer.BlockCopy(PayloadBuffer, 0, NewPacketBuffer, 0, CurrentBytesRead);
                             InboundPacketHandler();
                         }
