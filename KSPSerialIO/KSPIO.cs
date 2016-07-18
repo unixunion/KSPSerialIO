@@ -349,7 +349,7 @@ namespace KSPSerialIO
                                 }
                                 // TODO: Should I have an else here?
                                 break;
-                            case cid:
+                            case Cid:
                                 if (CompareChecksum(ReadBuffer[x]))
                                 {
                                     // copy PayloadBuffer in to vessel
@@ -367,6 +367,16 @@ namespace KSPSerialIO
                         break;
                 }
             }
+        }
+
+        private static bool CompareChecksum(byte readCS)
+        {
+            byte calcCS = CurrentPacketLength;
+            for (int i=0; i<CurrentPacketLength; i++)
+            {
+                calcCS ^= PayloadBuffer[i];
+            }
+            return (calcCS == readCS);
         }
 
         //these are copied from the intarwebs, converts struct to byte array
