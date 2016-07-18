@@ -467,92 +467,89 @@ namespace KSPSerialIO
 
                     //print("KSPSerialIO: receive threshold " + Port.ReceivedBytesThreshold.ToString());
 
+                    String[] PortNames;
                     if (SerialCOMSKey == null)
                     {
                         Debug.Log("KSPSerialIO: Dude do you even win32 serial port??");
+                        PortNames = new String[1];
+                        PortNames[0] = SettingsNStuff.DefaultPort;
                     }
                     else
                     {
                         String[] realports = SerialCOMSKey.GetValueNames();  // get list of all serial devices
-                        String[] names = new string[realports.Length + 1];   // make a new list with 1 extra, we put the default port first
-                        realports.CopyTo(names, 1);
-
-                        Debug.Log("KSPSerialIO: Found " + names.Length.ToString() + " serial ports");
-
-                        //look through all found ports for our display
-                        int j = 0;
-
-                        foreach (string PortName in names)
-                        {
-                            if (j == 0)  // try default port first
-                            {
-                                PortNumber = SettingsNStuff.DefaultPort;
-                                Debug.Log("KSPSerialIO: trying default port " + PortNumber);
-                            }
-                            else
-                            {
-                                PortNumber = (string)SerialCOMSKey.GetValue(PortName);
-                                Debug.Log("KSPSerialIO: trying port " + PortName + " - " + PortNumber);
-                            }
-
-                            Port.PortName = PortNumber;
-
-                            j++;
-
-                            if (!Port.IsOpen)
-                            {
-                                try
-                                {
-                                    Port.Open();
-                                }
-                                catch (Exception e)
-                                {
-                                    Debug.Log("Error opening serial port " + Port.PortName + ": " + e.Message);
-                                }
-
-                                //secret handshake
-                                if (Port.IsOpen && (SettingsNStuff.HandshakeDisable == 0))
-                                {
-                                    Thread.Sleep(SettingsNStuff.HandshakeDelay);
-                                    //Port.DiscardOutBuffer();
-                                    //Port.DiscardInBuffer();
-                                    
-                                    sendPacket(HPacket);
-
-                                    //wait for reply
-                                    int k = 0;
-                                   
-                                    while (Port.BytesToRead == 0 && k < 15 && !DisplayFound)
-                                    {
-                                        Thread.Sleep(100);
-                                        k++;
-                                    }                                    
-
-                                    Port.Close();
-                                    if (DisplayFound)
-                                    {
-                                        Debug.Log("KSPSerialIO: found KSP Display at " + Port.PortName);
-                                        break;
-                                    }
-                                    else
-                                    {
-                                        Debug.Log("KSPSerialIO: KSP Display not found");
-                                    }
-                                }
-                                else if (Port.IsOpen && (SettingsNStuff.HandshakeDisable == 1))
-                                {
-                                    DisplayFound = true;                                    
-                                    Debug.Log("KSPSerialIO: Handshake disabled, using " + Port.PortName);
-                                    break;
-                                }
-                            }
-                            else
-                            {
-                                Debug.Log("KSPSerialIO: " + PortNumber + "is already being used.");
-                            }
-                        }
+                        PortNames = new String[realports.Length + 1];   // make a new list with 1 extra, we put the default port first
+                        realports.CopyTo(PortNames, 1);
                     }
 
+                    Debug.Log(String.Format("KSPSerialIO: Found {0} serial ports",
+                                            PortNames.Length));
+
+                    //look through all found ports for our display
+                    for (int j=0; j < PortNames.Length; j++)
+                    {
+                        if (j == 0)  // try default port first
+                        {
+                            PortNumber = SettingsNStuff.DefaultPort;
+                            Debug.Log("KSPSerialIO: trying default port " + PortNumber);
+                        }
+                        else
+                        {
+                            PortNumber = (string)SerialCOMSKey.GetValue(PortNames[j]);
+                            Debug.Log("KSPSerialIO: trying port " + PortNames[j] + " - " + PortNumber);
+                        }
+                        Port.PortName = PortNumber;
+
+                        if (!Port.IsOpen)
+                        {
+                            try
+                            {
+                                Port.Open();
+                            }
+                            catch (Exception e)
+                            {
+                                Debug.Log("Error opening serial port " + Port.PortName + ": " + e.Message);
+                            }
+
+                            //secret handshake
+                            if (Port.IsOpen && (SettingsNStuff.HandshakeDisable == 0))
+                            {
+                                Thread.Sleep(SettingsNStuff.HandshakeDelay);
+                                //Port.DiscardOutBuffer();
+                                //Port.DiscardInBuffer();
+                                
+                                sendPacket(HPacket);
+
+                                //wait for reply
+                                int k = 0;
+                                while (Port.BytesToRead == 0 && k < 15 && !DisplayFound)
+                                {
+                                    Thread.Sleep(100);
+                                    k++;
+                                }
+
+                                Port.Close();
+                                if (DisplayFound)
+                                {
+                                    Debug.Log("KSPSerialIO: found KSP Display at " + Port.PortName);
+                                    break;
+                                }
+                                else
+                                {
+                                    Debug.Log("KSPSerialIO: KSP Display not found");
+                                }
+                            }
+                            else if (Port.IsOpen && (SettingsNStuff.HandshakeDisable == 1))
+                            {
+                                DisplayFound = true;                                    
+                                Debug.Log("KSPSerialIO: Handshake disabled, using " + Port.PortName);
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            Debug.Log("KSPSerialIO: " + PortNumber + "is already being used.");
+                        }
+                    }
                 }
                 catch (Exception e)
                 {
