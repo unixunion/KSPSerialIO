@@ -272,13 +272,11 @@ namespace KSPSerialIO
 
         public static void InboundPacketHandler()
         {
-            Debug.Log("In KSPSerialIO.KSPSerialPort.InboundPacketHandler");
             if (true)
             {
                 switch (NewPacketBuffer[0])
                 {
                     case HSPid:
-                        Debug.Log("Got a handshake packet.");
                         HPacket = (HandShakePacket)ByteArrayToStructure(NewPacketBuffer, HPacket);
                         HandShake();
                         if ((HPacket.M1 == 3) && (HPacket.M2 == 1) && (HPacket.M3 == 4)) {
