@@ -484,7 +484,9 @@ namespace KSPSerialIO
             }
             else
             {
-                Debug.Log("KSPSerialIO: Version 0.18.2");
+                String version = System.Reflection.Assembly.GetExecutingAssembly()
+                    .GetName().Version.ToString();
+                Debug.Log(String.Format("KSPSerialIO: Version {0}", version));
                 Debug.Log("KSPSerialIO: Getting serial ports...");
                 Debug.Log(String.Format("KSPSerialIO: Output packet size: {0}/{1}",
                                         Marshal.SizeOf(VData).ToString(),
