@@ -256,6 +256,8 @@ namespace KSPSerialIO
             CS // Waiting for checksum
         }
         private static ReceiveStates CurrentState = ReceiveStates.FIRSTHEADER;
+        private static byte CurrentPacketLength;
+        private static byte CurrentBytesRead;
 
         private const int MaxPayloadSize = 255;
         private static byte[] PayloadBuffer = new byte[MaxPayloadSize];
@@ -324,15 +326,41 @@ namespace KSPSerialIO
                         }
                         break;
                     case ReceiveStates.SIZE:
-                        // make inbound packet size == current byte
+                        CurrentPacketLength = ReadBuffer[x];
+                        CurrentBytesRead = 0;
                         CurrentState = ReceiveStates.PAYLOAD;
                         break;
                     case ReceiveStates.PAYLOAD:
-                        // append current byte to the payload buffer
-                        // then, if payload buffer size == inbound packet size
-                        // Change CurrentState to CS
+                        PayloadBuffer[CurrentBytesRead] = ReadBuffer[x];
+                        CurrentBytesRead++;
+                        if (CurrentBytesRead == CurrentPacketLength)
+                        {
+                            CurrentState = ReceiveStates.CS;
+                        }
                         break;
                     case ReceiveStates.CS:
+                        switch(PayloadBuffer[0])
+                        {
+                            case HSPid:
+                                if (CompareChecksum(ReadBuffer[x]))
+                                {
+                                    // copy PayloadBuffer in to handshake
+                                    // packet and do handshaking
+                                }
+                                // TODO: Should I have an else here?
+                                break;
+                            case cid:
+                                if (CompareChecksum(ReadBuffer[x]))
+                                {
+                                    // copy PayloadBuffer in to vessel
+                                    // control packet and control vessel
+                                }
+                                // TODO: else?
+                                break;
+                            default:
+                                Invoke("Unimplemented", 0);
+                                break;
+                        }
                         // Current byte is checksum.
                         // Now we have a full packet.
                         CurrentState = ReceiveStates.FIRSTHEADER;
