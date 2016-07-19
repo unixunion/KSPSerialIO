@@ -30,6 +30,11 @@ in a separate thread. It should be more reliable and less laggy.
 
 * Everything else, as far as I'm aware.
 
+## To do
+
+* Check if the port is open before trying to start reading, instead of just catching the exception. The delay in the exception handler is at least part of the reason this isn't working on Windows 10.
+* Clean up the stream handler and thread in OnDestroy, to make sure we're not leaving uncollected garbage lying around.
+
 ## License
 
 Like the original plugin, this code is licensed under [CC-BY](https://creativecommons.org/licenses/by/4.0/).
