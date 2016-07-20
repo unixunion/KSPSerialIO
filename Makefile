@@ -32,3 +32,5 @@ package: all
 	cp config.xml $(PACKAGECONFIGDIR)
 	cd package; zip -r -9 ../KSPSerialIO-cross-$(PLUGINVERSION).zip KSPSerialIO
 	rm -r package
+	echo $(PLUGINVERSION) > KSPSerialIO.version
+
