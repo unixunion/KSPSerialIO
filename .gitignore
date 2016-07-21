@@ -216,4 +216,7 @@ pip-log.txt
 
 # Symlink to KSP assemblies
 KSPresources
+# Local build artifacts
+*.zip
+KSPSerialIO.version
 
