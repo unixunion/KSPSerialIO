@@ -248,6 +248,7 @@ namespace KSPSerialIO
         public static VesselControls VControls = new VesselControls();
         public static VesselControls VControlsOld = new VesselControls();
 
+        private const int MaxPayloadSize = 255;
         enum ReceiveStates: byte {
             FIRSTHEADER, // Waiting for first header
             SECONDHEADER, // Waiting for second header
@@ -258,8 +259,12 @@ namespace KSPSerialIO
         private static ReceiveStates CurrentState = ReceiveStates.FIRSTHEADER;
         private static byte CurrentPacketLength;
         private static byte CurrentBytesRead;
-        private const int MaxPayloadSize = 255;
+        // Guards access to data shared between threads
+        private static Mutex SerialMutex = new Mutex();
+        // Serial worker uses this buffer to read bytes
         private static byte[] PayloadBuffer = new byte[MaxPayloadSize];
+        // Buffer for sharing packets from serial worker to main thrad
+        private static volatile bool NewPacketFlag = false;
         private static volatile byte[] NewPacketBuffer = new byte[MaxPayloadSize];
         private static Thread SerialThread;
 
@@ -267,10 +272,13 @@ namespace KSPSerialIO
 
         public static void InboundPacketHandler()
         {
+            SerialMutex.WaitOne();
+            NewPacketFlag = false;
             switch (NewPacketBuffer[0])
             {
                 case HSPid:
                     HPacket = (HandShakePacket)ByteArrayToStructure(NewPacketBuffer, HPacket);
+                    SerialMutex.ReleaseMutex();
                     HandShake();
                     if ((HPacket.M1 == 3) && (HPacket.M2 == 1) && (HPacket.M3 == 4)) {
                         DisplayFound = true;
@@ -280,9 +288,12 @@ namespace KSPSerialIO
                     }
                     break;
                 case Cid:
+                    CPacket = (ControlPacket)ByteArrayToStructure(PayloadBuffer, CPacket);
+                    SerialMutex.ReleaseMutex();
                     VesselControls();
                     break;
                 default:
+                    SerialMutex.ReleaseMutex();
                     Debug.Log("KSPSerialIO: Packet id unimplementd");
                     break;
             }
@@ -325,6 +336,14 @@ namespace KSPSerialIO
             while (!SerialThread.IsAlive);
         }
 
+        private void Update()
+        {
+            if (NewPacketFlag)
+            {
+                InboundPacketHandler();
+            }
+        }
+
         private void SerialWorker()
         {
             byte[] buffer = new byte[MaxPayloadSize + 4];
@@ -333,10 +352,13 @@ namespace KSPSerialIO
             kickoffRead = delegate {
                 try
                 {
+                    Debug.Log("KSPSerialIO: BeginRead");
                     Port.BaseStream.BeginRead(buffer, 0, buffer.Length, delegate (IAsyncResult ar) {
                             try
                             {
+                                Debug.Log("KSPSerialIO: About to EndRead");
                                 int actualLength = Port.BaseStream.EndRead(ar);
+                                Debug.Log("KSPSerialIO: EndRead done");
                                 byte[] received = new byte[actualLength];
                                 Buffer.BlockCopy(buffer, 0, received, 0, actualLength);
                                 ReceivedDataEvent(received, actualLength);
@@ -396,8 +418,16 @@ namespace KSPSerialIO
                     case ReceiveStates.CS:
                         if (CompareChecksum(ReadBuffer[x]))
                         {
+                            SerialMutex.WaitOne();
                             Buffer.BlockCopy(PayloadBuffer, 0, NewPacketBuffer, 0, CurrentBytesRead);
-                            InboundPacketHandler();
+                            NewPacketFlag = true;
+                            SerialMutex.ReleaseMutex();
+                            // Seedy hack: Handshake happens during scene
+                            // load before Update() is ever called
+                            if (!DisplayFound)
+                            {
+                                InboundPacketHandler();
+                            }
                         }
                         CurrentState = ReceiveStates.FIRSTHEADER;
                         break;
@@ -595,7 +625,6 @@ namespace KSPSerialIO
 
         private static void VesselControls()
         {
-            CPacket = (ControlPacket)ByteArrayToStructure(PayloadBuffer, CPacket);
 
             VControls.SAS = BitMathByte(CPacket.MainControls, 7);
             VControls.RCS = BitMathByte(CPacket.MainControls, 6);
