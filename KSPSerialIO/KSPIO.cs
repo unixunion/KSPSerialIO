@@ -354,13 +354,10 @@ namespace KSPSerialIO
             SerialRead = delegate {
                 try
                 {
-                    Debug.Log("KSPSerialIO: BeginRead");
                     Port.BaseStream.BeginRead(buffer, 0, buffer.Length, delegate (IAsyncResult ar) {
                             try
                             {
-                                Debug.Log("KSPSerialIO: About to EndRead");
                                 int actualLength = Port.BaseStream.EndRead(ar);
-                                Debug.Log("KSPSerialIO: EndRead done");
                                 byte[] received = new byte[actualLength];
                                 Buffer.BlockCopy(buffer, 0, received, 0, actualLength);
                                 ReceivedDataEvent(received, actualLength);
@@ -383,6 +380,7 @@ namespace KSPSerialIO
             {
                 SerialRead();
             }
+            Debug.Log("KSPSerialIO: Serial worker thread shutting down.");
         }
 
         private void ReceivedDataEvent(byte[] ReadBuffer, int BufferLength)
