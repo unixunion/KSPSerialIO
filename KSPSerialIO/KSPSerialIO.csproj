@@ -41,8 +41,8 @@
     <Reference Include="KSPUtil">
       <HintPath>..\KSPResources\KSPUtil.dll</HintPath>
     </Reference>
-    <Reference Include="PsimaxSerial">
-      <HintPath>..\..\PsimaxSerial\PsimaxSerial\bin\Release\PsimaxSerial.dll</HintPath>
+    <Reference Include="SerialPort">
+      <HintPath>.\SerialPort.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

@@ -7,7 +7,7 @@ using System.Threading;
 using Microsoft.Win32;
 using System.Runtime.InteropServices;
 
-using Psimax.IO.Ports;
+using OpenNETCF.IO.Ports;
 using UnityEngine;
 using KSP.IO;
 using KSP.UI.Screens;
@@ -304,6 +304,7 @@ namespace KSPSerialIO
 
         public static void sendPacket(object anything)
         {
+            Debug.Log("Sending packet");
             byte[] Payload = StructureToByteArray(anything);
             byte header1 = 0xBE;
             byte header2 = 0xEF;
