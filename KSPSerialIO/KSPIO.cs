@@ -266,6 +266,8 @@ namespace KSPSerialIO
         // Buffer for sharing packets from serial worker to main thrad
         private static volatile bool NewPacketFlag = false;
         private static volatile byte[] NewPacketBuffer = new byte[MaxPayloadSize];
+        // Semaphore to indicate whether the serial worker should do work
+        private static volatile bool doSerialRead = true;
         private static Thread SerialThread;
 
         private const byte HSPid = 0, VDid = 1, Cid = 101; //hard coded values for packet IDS
@@ -347,9 +349,9 @@ namespace KSPSerialIO
         private void SerialWorker()
         {
             byte[] buffer = new byte[MaxPayloadSize + 4];
-            Action kickoffRead = null;
+            Action SerialRead = null;
             Debug.Log("KSPSerialIO: Serial Worker thread started");
-            kickoffRead = delegate {
+            SerialRead = delegate {
                 try
                 {
                     Debug.Log("KSPSerialIO: BeginRead");
@@ -368,17 +370,19 @@ namespace KSPSerialIO
                                 Debug.Log("IOException in SerialWorker :(");
                                 Debug.Log(exc.ToString());
                             }
-                            kickoffRead();
                         }, null);
                 }
                 catch (InvalidOperationException)
                 {
                     Debug.Log("KSPSerialIO: Trying to read port that isn't open. Sleeping");
                     Thread.Sleep(500);
-                    kickoffRead();
                 }
             };
-            kickoffRead();
+
+            while (doSerialRead)
+            {
+                SerialRead();
+            }
         }
 
         private void ReceivedDataEvent(byte[] ReadBuffer, int BufferLength)
@@ -686,6 +690,7 @@ namespace KSPSerialIO
         {
             if (KSPSerialPort.Port.IsOpen)
             {
+                doSerialRead = false;
                 KSPSerialPort.Port.Close();
                 Debug.Log("KSPSerialIO: Port closed");
             }
