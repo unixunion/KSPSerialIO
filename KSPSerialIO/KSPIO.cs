@@ -936,8 +936,8 @@ namespace KSPSerialIO
 
                     Orbit farOrbit = fetchFarOrbit(ActiveVessel);
                     KSPSerialPort.VData.FarSOINumber = GetSOINumber(farOrbit.referenceBody.name);
-                    KSPSerialPort.VData.FarAP = farOrbit.ApA;
-                    KSPSerialPort.VData.FarPE = farOrbit.PeA;
+                    KSPSerialPort.VData.FarAP = (float)farOrbit.ApA;
+                    KSPSerialPort.VData.FarPE = (float)farOrbit.PeA;
 
 
                     #region debugjunk
