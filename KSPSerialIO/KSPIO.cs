@@ -70,6 +70,9 @@ namespace KSPSerialIO
         public float IAS;           //50  Indicated Air Speed
         public byte CurrentStage;   //51  Current stage number
         public byte TotalStage;     //52  TotalNumber of stages
+        public byte FarSOINumber;   //53  The SOI of the farthest patch. 0 if this is an uniterrupted orbit.
+        public float FarAP;         //54  The AP of the farthest patch.
+        public float FarPE;         //55  The PE of the farthest patch.
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -934,6 +937,7 @@ namespace KSPSerialIO
                     
 
                     #region debugjunk
+                    Debug.Log("KSPSerialIO: Far SOI " + KSPSerialPort.VData.FarSOINumber.ToString() + " Far AP " + KSPSerialPort.VData.FarAP.ToString() + " Far PE " + KSPSerialPort.VData.FarPE.ToString());
                     
                     /*
                       Debug.Log("KSPSerialIO: Stage " + KSPSerialPort.VData.CurrentStage.ToString() + ' ' +
@@ -1139,6 +1143,33 @@ namespace KSPSerialIO
         }
 
         #region utilities
+
+        private Orbit fetchFarOrbit(Vessel v)
+        {
+            Orbit prevOrbit = null;
+            Orbit curOrbit = v.orbit;
+            Orbit nextOrbit = curOrbit.nextPatch;
+            while (nextOrbit != null && nextOrbit.activePatch)
+            {
+                if (prevOrbit != null && ReferenceEquals(prevOrbit.referenceBody, nextOrbit.referenceBody))
+                {
+                    break;
+                } else
+                {
+                    prevOrbit = curOrbit;
+                    curOrbit = nextOrbit;
+                    nextOrbit = curOrbit.nextPatch;
+                }
+            }
+
+            if (prevOrbit == null)
+            {
+                return null;
+            } else
+            {
+                return curOrbit;
+            }
+        }
 
         private byte GetMaxOverHeat(Vessel V)
         {
