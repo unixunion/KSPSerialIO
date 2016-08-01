@@ -935,7 +935,7 @@ namespace KSPSerialIO
                     KSPSerialPort.VData.TotalStage = (byte)StageManager.StageCount;
 
                     Orbit farOrbit = fetchFarOrbit(ActiveVessel);
-                    KSPSerialPort.VData.FarSOINumber = GetSOINumber(farOrbit);
+                    KSPSerialPort.VData.FarSOINumber = GetSOINumber(farOrbit.referenceBody.name);
                     KSPSerialPort.VData.FarAP = farOrbit.ApA;
                     KSPSerialPort.VData.FarPE = farOrbit.PeA;
 
