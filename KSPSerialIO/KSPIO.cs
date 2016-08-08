@@ -935,13 +935,15 @@ namespace KSPSerialIO
                     KSPSerialPort.VData.TotalStage = (byte)StageManager.StageCount;
 
                     Orbit farOrbit = fetchFarOrbit(ActiveVessel);
-                    KSPSerialPort.VData.FarSOINumber = GetSOINumber(farOrbit.referenceBody.name);
-                    KSPSerialPort.VData.FarAP = (float)farOrbit.ApA;
-                    KSPSerialPort.VData.FarPE = (float)farOrbit.PeA;
-
+                    if (farOrbit != null)
+                    {
+                        KSPSerialPort.VData.FarSOINumber = GetSOINumber(farOrbit.referenceBody.name);
+                        KSPSerialPort.VData.FarAP = (float)farOrbit.ApA;
+                        KSPSerialPort.VData.FarPE = (float)farOrbit.PeA;
+                    }
 
                     #region debugjunk
-                    Debug.Log("KSPSerialIO: Far SOI " + KSPSerialPort.VData.FarSOINumber.ToString() + " Far AP " + KSPSerialPort.VData.FarAP.ToString() + " Far PE " + KSPSerialPort.VData.FarPE.ToString());
+                    //Debug.Log("KSPSerialIO: Far SOI " + KSPSerialPort.VData.FarSOINumber.ToString() + " Far AP " + KSPSerialPort.VData.FarAP.ToString() + " Far PE " + KSPSerialPort.VData.FarPE.ToString());
                     
                     /*
                       Debug.Log("KSPSerialIO: Stage " + KSPSerialPort.VData.CurrentStage.ToString() + ' ' +
