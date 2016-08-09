@@ -942,6 +942,10 @@ namespace KSPSerialIO
                         KSPSerialPort.VData.FarSOINumber = GetSOINumber(farOrbit.referenceBody.name);
                         KSPSerialPort.VData.FarAP = (float)farOrbit.ApA;
                         KSPSerialPort.VData.FarPE = (float)farOrbit.PeA;
+                    } else {
+                        KSPSerialPort.VData.FarSOINumber = 0;
+                        KSPSerialPort.VData.FarAP = 0;
+                        KSPSerialPort.VData.FarPE = 0;
                     }
 
                     #region debugjunk
