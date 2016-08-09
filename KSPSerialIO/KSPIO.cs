@@ -684,7 +684,7 @@ namespace KSPSerialIO
                 VData.ActionGroups &= (UInt16)~(1 << n);      // forces nth bit of x to be 0.  all other bits left alone.
         }
 
-        void OnDestroy()
+        public static void PortCleanup()
         {
             if (KSPSerialPort.Port.IsOpen)
             {
@@ -1604,7 +1604,7 @@ namespace KSPSerialIO
         {
             if (KSPSerialPort.Port.IsOpen)
             {
-                KSPSerialPort.Port.Close();
+                KSPSerialPort.PortCleanup();
                 ScreenMessages.PostScreenMessage("Port closed", 10f, KSPIOScreenStyle);
             }
 
