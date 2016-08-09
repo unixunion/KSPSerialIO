@@ -693,6 +693,7 @@ namespace KSPSerialIO
             {
                 doSerialRead = false;
                 KSPSerialPort.Port.Close();
+                KSPSerialPort.Port.Dispose();
                 Debug.Log("KSPSerialIO: Port closed");
             }
         }
