@@ -379,6 +379,7 @@ namespace KSPSerialIO
                 }
             };
 
+            doSerialRead = true;
             while (doSerialRead)
             {
                 SerialRead();
