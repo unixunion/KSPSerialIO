@@ -919,7 +919,8 @@ namespace KSPSerialIO
                     }
 
                     //Debug.Log("KSPSerialIO: 5");
-
+                    /* This currently causes nullrefs when the
+                       target is a celestial body.
                     if (FlightGlobals.fetch.VesselTarget != null) {
                         Vessel targetVessel = FlightGlobals.fetch.VesselTarget.GetVessel();
                         Vector3 targetVector = (targetVessel.GetWorldPos3D() - ActiveVessel.GetWorldPos3D()).normalized;
@@ -927,6 +928,7 @@ namespace KSPSerialIO
                         KSPSerialPort.VData.TargetPitch = ToScaledUInt(targetRelativeHeading[0]);
                         KSPSerialPort.VData.TargetHeading = ToScaledUInt(targetRelativeHeading[1]);
                     }
+                    */
 
                     Quaternion attitude = updateHeadingPitchRollField(ActiveVessel);
 
