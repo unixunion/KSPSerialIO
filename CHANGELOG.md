@@ -1,5 +1,7 @@
 # Changelog
 
+* **0.18.6.1**: 20170304
+  This release just updates to the upstream 0.18.6 release.
 * **0.18.2.2**: 20160809
   I'm still getting the hang of making the new serial handling code work
   properly, sorry. This release is a minor change to the serial port

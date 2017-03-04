@@ -5,6 +5,12 @@ plugin for Kerbal Space Program. KSPSerialIO provides a serial interface for
 KSP. This fork of the plugin replaces the underlying serial library and
 provides support for Linux and Mac OS.
 
+## Usage
+
+This version is compatible with version 0.18.6 of zitronen's KSPSerialIO, and
+their `KSPIODemo16` example sketch. Refer to the forum thread for current
+packet format and the demo code.
+
 ## How does it differ from zitronen's fork?
 
 This fork replaces the old serial library with [PsiMax Serial library](https://github.com/unixunion/PsimaxSerial).
