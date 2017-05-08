@@ -97,7 +97,7 @@ namespace KSPSerialIO
         public byte MainControls;                  //SAS RCS Lights Gear Brakes Precision Abort Stage 
         public byte Mode;                          //0 = stage, 1 = docking, 2 = map
         public ushort ControlGroup;                //control groups 1-10 in 2 bytes
-        public byte NavballSASMode;                       //AutoPilot mode (See above for AutoPilot modes)(Ignored if the equal to zero or out of bounds (>10)) //Navball mode
+        public byte NavballSASMode;                //AutoPilot mode (See above for AutoPilot modes)(Ignored if the equal to zero or out of bounds (>10)) //Navball mode
         public byte AdditionalControlByte1;
         public short Pitch;                        //-1000 -> 1000
         public short Roll;                         //-1000 -> 1000
@@ -764,7 +764,11 @@ namespace KSPSerialIO
                 }
 
                 Thread.Sleep(200);
+
+                ActiveVessel.OnPostAutopilotUpdate -= AxisInput;
                 ActiveVessel = FlightGlobals.ActiveVessel;
+                ActiveVessel.OnPostAutopilotUpdate += AxisInput;
+
                 //sync inputs at start
                 ActiveVessel.ActionGroups.SetGroup(KSPActionGroup.RCS, KSPSerialPort.VControls.RCS);
                 ActiveVessel.ActionGroups.SetGroup(KSPActionGroup.SAS, KSPSerialPort.VControls.SAS);
@@ -786,11 +790,11 @@ namespace KSPSerialIO
                 ActiveVessel.ActionGroups.SetGroup(KSPActionGroup.Custom10, KSPSerialPort.VControls.ControlGroup[10]);
 
                 /*
-                  ActiveVessel.OnFlyByWire -= new FlightInputCallback(AxisInput);
-                  ActiveVessel.OnFlyByWire += new FlightInputCallback(AxisInput);
-                */
+                ActiveVessel.OnFlyByWire -= new FlightInputCallback(AxisInput);
+                ActiveVessel.OnFlyByWire += new FlightInputCallback(AxisInput);
                 ActiveVessel.OnPostAutopilotUpdate -= AxisInput;
                 ActiveVessel.OnPostAutopilotUpdate += AxisInput;
+                */
             }
             else
             {
