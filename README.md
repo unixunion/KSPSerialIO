@@ -7,7 +7,7 @@ provides support for Linux and Mac OS.
 
 ## Usage
 
-This version is compatible with version 0.18.6 of zitronen's KSPSerialIO, and
+This version is compatible with version 0.18.7 of zitronen's KSPSerialIO, and
 their `KSPIODemo16` example sketch. Refer to the forum thread for current
 packet format and the demo code.
 
