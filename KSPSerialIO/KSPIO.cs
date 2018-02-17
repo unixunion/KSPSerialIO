@@ -369,14 +369,16 @@ namespace KSPSerialIO
                             try
                             {
                                 int actualLength = Port.BaseStream.EndRead(ar);
+                                Debug.Log("KSPSerialIO: actualLength: " + actualLength);
                                 byte[] received = new byte[actualLength];
                                 Buffer.BlockCopy(buffer, 0, received, 0, actualLength);
+                                NewPacketFlag=true;
                                 ReceivedDataEvent(received, actualLength);
                             }
                             catch (IOException exc)
                             {
-                                Debug.Log("IOException in SerialWorker :(");
-                                Debug.Log(exc.ToString());
+                            Debug.Log("KSPSerialIO: IOException in SerialWorker :(");
+                            Debug.Log("KSPSerialIO: " + exc.ToString());
                             }
                         }, null);
                 }
@@ -577,6 +579,7 @@ namespace KSPSerialIO
                         {
                             try
                             {
+                                Debug.Log("KSPSerialIO: Opening port " + Port.PortName);
                                 Port.Open();
                             }
                             catch (Exception e)
@@ -595,9 +598,10 @@ namespace KSPSerialIO
 
                                 //wait for reply
                                 int k = 0;
-                                while (k < 15 && !DisplayFound)
+                                while (k < 32 && !DisplayFound)
                                 {
                                     Thread.Sleep(100);
+                                    sendPacket (HPacket);
                                     k++;
                                 }
 
@@ -1186,22 +1190,21 @@ namespace KSPSerialIO
                     {
                         //ActiveVessel.Autopilot.SAS.ManualOverride(true); 
 
-                        if ((ActiveVessel.Autopilot.SAS.lockedMode == true) && (wasSASOn == false))
+                        if ((ActiveVessel.ActionGroups[KSPActionGroup.SAS]) && (wasSASOn == false))
                         {
                             wasSASOn = true;
-                        }
-                        else if (wasSASOn != true)
-                        {
-                            wasSASOn = false;
+                            ActiveVessel.ActionGroups.SetGroup(KSPActionGroup.SAS, false);
                         }
 
+                        //ScreenMessages.PostScreenMessage("KSPSerialIO: SAS mode " + wasSASOn);
+
+                        /*
                         if (wasSASOn == true)
-                        {
-                            ActiveVessel.ActionGroups.SetGroup(KSPActionGroup.SAS, false);
+                        {                            
                             //ActiveVessel.Autopilot.SAS.lockedMode = false;
                             //ActiveVessel.Autopilot.SAS.dampingMode = true;
                         }
-                        /*                                              
+                                                                      
                         
                         if (KSPSerialPort.VControls.SAS == true)
                         {
