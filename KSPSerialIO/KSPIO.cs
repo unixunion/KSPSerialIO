@@ -369,10 +369,8 @@ namespace KSPSerialIO
                             try
                             {
                                 int actualLength = Port.BaseStream.EndRead(ar);
-                                Debug.Log("KSPSerialIO: actualLength: " + actualLength);
                                 byte[] received = new byte[actualLength];
                                 Buffer.BlockCopy(buffer, 0, received, 0, actualLength);
-                                NewPacketFlag=true;
                                 ReceivedDataEvent(received, actualLength);
                             }
                             catch (IOException exc)
