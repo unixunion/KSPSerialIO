@@ -596,7 +596,7 @@ namespace KSPSerialIO
 
                                 //wait for reply
                                 int k = 0;
-                                while (k < 32 && !DisplayFound)
+                                while (k < 15 && !DisplayFound)
                                 {
                                     Thread.Sleep(100);
                                     sendPacket (HPacket);
@@ -707,7 +707,10 @@ namespace KSPSerialIO
                 doSerialRead = false;
                 KSPSerialPort.Port.Close();
                 KSPSerialPort.Port.Dispose();
+                DisplayFound = false;
                 Debug.Log("KSPSerialIO: Port closed");
+            } else {
+                Debug.Log("KSPSerialIO: Port already closed");
             }
         }
     }
